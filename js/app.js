@@ -1293,7 +1293,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = '送齁康_我的資料.json';
+            a.download = '送好康_我的資料.json';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

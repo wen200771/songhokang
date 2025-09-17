@@ -1,7 +1,7 @@
 <?php
 /**
  * API 主入口文件
- * 送齁康優惠券平台 REST API
+ * 送好康優惠券平台 REST API
  */
 
 require_once '../config/config.php';

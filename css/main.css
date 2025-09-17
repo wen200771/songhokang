@@ -655,7 +655,7 @@
         }
 
         .sidebar.expanded .sidebar-logo .logo::before {
-            content: "送齁康";
+            content: "送好康";
             justify-content: flex-start;
             padding-left: 8px;
         }

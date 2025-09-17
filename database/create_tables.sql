@@ -1,4 +1,4 @@
--- 送齁康優惠券平台資料庫結構
+-- 送好康優惠券平台資料庫結構
 -- 建立日期: 2024年
 -- 編碼: UTF8MB4 (支援 emoji 和中文)
 
@@ -212,7 +212,7 @@ INSERT INTO `users` (`username`, `email`, `password`, `role`, `status`) VALUES
 
 -- 插入基本系統設定
 INSERT INTO `system_settings` (`setting_key`, `setting_value`, `setting_type`, `description`) VALUES
-('site_name', '送齁康', 'string', '網站名稱'),
+('site_name', '送好康', 'string', '網站名稱'),
 ('site_description', '台灣最大優惠券折價券平台', 'string', '網站描述'),
 ('admin_email', 'admin@songhokang.com', 'string', '管理員郵箱'),
 ('max_upload_size', '5242880', 'integer', '最大上傳文件大小(bytes)'),
