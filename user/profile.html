@@ -1,0 +1,858 @@
+ㄥ<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>送齁康 - 個人資料</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: #f6f7f9;
+            margin: 0;
+            color: #374151;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: rgba(248, 247, 246, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(252, 163, 17, 0.2);
+        }
+
+        .header .title {
+            font-weight: 700;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .header .actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            background: #fff;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        .btn.primary {
+            background: #2563eb;
+            color: #fff;
+            border-color: #2563eb;
+        }
+
+        .btn.primary:hover {
+            background: #1d4ed8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .sidebar {
+            background: rgba(248, 247, 246, 0.7);
+            border: 1px solid rgba(252, 163, 17, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            height: fit-content;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 8px 24px rgba(252, 163, 17, 0.1);
+        }
+
+        .avatar-section {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+            font-weight: 600;
+            margin: 0 auto 16px;
+            position: relative;
+        }
+
+        .avatar input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .avatar-upload-tip {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        .user-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .user-email {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-menu li {
+            margin-bottom: 8px;
+        }
+
+        .nav-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            background: rgba(252, 163, 17, 0.15);
+            color: #d97706;
+        }
+
+        .nav-menu .icon {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        .main-content {
+            background: rgba(248, 247, 246, 0.7);
+            border: 1px solid rgba(252, 163, 17, 0.2);
+            border-radius: 16px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 8px 24px rgba(252, 163, 17, 0.1);
+        }
+
+        .content-header {
+            padding: 24px 24px 0;
+            border-bottom: 1px solid rgba(252, 163, 17, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .content-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .content-subtitle {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .content-body {
+            padding: 0 24px 24px;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #374151;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title .icon {
+            margin-right: 8px;
+            color: #f59e0b;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .form-input:disabled {
+            background: #f9fafb;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(252, 163, 17, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #f59e0b;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #d1fae5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+        }
+
+        .alert.error {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #f59e0b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-layout {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .sidebar {
+                order: 2;
+            }
+
+            .main-content {
+                order: 1;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="title">🎭 個人資料管理</div>
+        <div class="actions">
+            <a href="index.html" class="btn">返回會員中心</a>
+            <button id="btnLogout" class="btn">登出</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="guard" class="card" style="display:none">
+            <div style="font-weight:700;margin-bottom:8px">需要登入</div>
+            <div style="color:#666;margin-bottom:12px">請先登入您的會員帳號</div>
+            <div><a class="btn primary" href="../index.html">前往登入</a></div>
+        </div>
+
+        <div id="profileContent" style="display:none">
+            <div class="profile-layout">
+                <!-- 側邊欄 -->
+                <div class="sidebar">
+                    <div class="avatar-section">
+                        <div class="avatar" id="userAvatar">U
+                            <input id="avatarFile" type="file" accept="image/*" title="點此上傳頭像">
+                        </div>
+                        <button class="btn" id="avatarUploadBtn" style="margin-top:8px;">更換頭像</button>
+                        <div class="avatar-upload-tip">支援 JPG/PNG/WebP，建議 1:1</div>
+                        <div class="user-name" id="userName">載入中...</div>
+                        <div class="user-email" id="userEmail">載入中...</div>
+                    </div>
+
+                    <ul class="nav-menu">
+                        <li><a href="#basic" class="nav-link active" data-section="basic">
+                                <span class="icon">👤</span>基本資料
+                            </a></li>
+                        <li><a href="#security" class="nav-link" data-section="security">
+                                <span class="icon">🔒</span>安全設定
+                            </a></li>
+                        <li><a href="#stats" class="nav-link" data-section="stats">
+                                <span class="icon">📊</span>使用統計
+                            </a></li>
+                    </ul>
+                </div>
+
+                <!-- 主要內容 -->
+                <div class="main-content">
+                    <!-- 基本資料區塊 -->
+                    <div id="basicSection" class="content-section">
+                        <div class="content-header">
+                            <div class="content-title">基本資料</div>
+                            <div class="content-subtitle">管理您的個人基本資訊</div>
+                        </div>
+                        <div class="content-body">
+                            <div id="basicAlert" class="alert"></div>
+
+                            <form id="basicForm">
+                                <div class="form-section">
+                                    <div class="section-title">
+                                        <span class="icon">📝</span>個人資訊
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">用戶名</label>
+                                            <input type="text" id="username" class="form-input" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">電子郵件</label>
+                                            <input type="email" id="email" class="form-input">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">手機號碼</label>
+                                            <input type="tel" id="phone" class="form-input">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">會員等級</label>
+                                            <input type="text" id="role" class="form-input" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-section">
+                                    <div class="section-title">
+                                        <span class="icon">📅</span>帳號資訊
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">註冊時間</label>
+                                            <input type="text" id="createdAt" class="form-input" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">最後登入</label>
+                                            <input type="text" id="lastLogin" class="form-input" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">帳號狀態</label>
+                                            <input type="text" id="status" class="form-input" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn primary">
+                                    <span id="basicSaveText">儲存變更</span>
+                                    <span id="basicLoading" class="loading" style="display:none"></span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- 安全設定區塊 -->
+                    <div id="securitySection" class="content-section" style="display:none">
+                        <div class="content-header">
+                            <div class="content-title">安全設定</div>
+                            <div class="content-subtitle">管理您的帳號安全</div>
+                        </div>
+                        <div class="content-body">
+                            <div id="securityAlert" class="alert"></div>
+
+                            <form id="passwordForm">
+                                <div class="form-section">
+                                    <div class="section-title">
+                                        <span class="icon">🔑</span>修改密碼
+                                    </div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">目前密碼</label>
+                                            <input type="password" id="currentPassword" class="form-input" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">新密碼</label>
+                                            <input type="password" id="newPassword" class="form-input" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">確認新密碼</label>
+                                            <input type="password" id="confirmPassword" class="form-input" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn primary">
+                                    <span id="passwordSaveText">更新密碼</span>
+                                    <span id="passwordLoading" class="loading" style="display:none"></span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- 使用統計區塊 -->
+                    <div id="statsSection" class="content-section" style="display:none">
+                        <div class="content-header">
+                            <div class="content-title">使用統計</div>
+                            <div class="content-subtitle">查看您的使用情況統計</div>
+                        </div>
+                        <div class="content-body">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-number" id="favoriteCount">-</div>
+                                    <div class="stat-label">收藏優惠券</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number" id="usageCount">-</div>
+                                    <div class="stat-label">已使用優惠券</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number" id="loginCount">-</div>
+                                    <div class="stat-label">登入次數</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number" id="memberDays">-</div>
+                                    <div class="stat-label">會員天數</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const LS_TOKEN = 'authToken_user';
+        const getToken = () => localStorage.getItem(LS_TOKEN) || localStorage.getItem('authToken') || '';
+        const authHeader = () => ({ 'Authorization': 'Bearer ' + getToken() });
+
+        let currentUser = null;
+
+        // 頁面初始化
+        async function init() {
+            const ok = await guard();
+            if (!ok) return;
+
+            await loadUserProfile();
+            await loadUserStats();
+
+            // 綁定事件
+            bindEvents();
+        }
+
+        // 登入檢查
+        async function guard() {
+            const token = getToken();
+            if (!token) {
+                document.getElementById('guard').style.display = 'block';
+                return false;
+            }
+
+            try {
+                const res = await fetch('../api/auth/me', { headers: authHeader() });
+                const result = await res.json();
+
+                if (!result.success || !result.data) {
+                    document.getElementById('guard').style.display = 'block';
+                    return false;
+                }
+
+                currentUser = result.data;
+                document.getElementById('guard').style.display = 'none';
+                document.getElementById('profileContent').style.display = 'block';
+                return true;
+            } catch (error) {
+                document.getElementById('guard').style.display = 'block';
+                return false;
+            }
+        }
+
+        // 載入用戶資料
+        async function loadUserProfile() {
+            if (!currentUser) return;
+
+            // 更新側邊欄
+            const avatarEl = document.getElementById('userAvatar');
+            if (currentUser.avatar) {
+                avatarEl.style.background = 'center/cover no-repeat url(' + (currentUser.avatar.startsWith('http') ? currentUser.avatar : ('..' + (currentUser.avatar.startsWith('/') ? '' : '/') + currentUser.avatar)) + ')';
+                avatarEl.textContent = '';
+            } else {
+                avatarEl.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                avatarEl.textContent = currentUser.username.charAt(0).toUpperCase();
+            }
+            document.getElementById('userName').textContent = currentUser.username;
+            document.getElementById('userEmail').textContent = currentUser.email;
+
+            // 更新表單
+            document.getElementById('username').value = currentUser.username || '';
+            document.getElementById('email').value = currentUser.email || '';
+            document.getElementById('phone').value = currentUser.phone || '';
+            document.getElementById('role').value = getRoleText(currentUser.role);
+            document.getElementById('createdAt').value = formatDate(currentUser.created_at);
+            document.getElementById('lastLogin').value = formatDate(currentUser.last_login_at) || '從未登入';
+            document.getElementById('status').value = getStatusText(currentUser.status);
+        }
+
+        // 載入使用統計
+        async function loadUserStats() {
+            try {
+                // 載入收藏數量
+                const favRes = await fetch('../api/favorites', { headers: authHeader() });
+                const favData = await favRes.json();
+                document.getElementById('favoriteCount').textContent = favData?.data?.favorites?.length || 0;
+
+                // 計算會員天數
+                if (currentUser?.created_at) {
+                    const createdDate = new Date(currentUser.created_at);
+                    const now = new Date();
+                    const days = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
+                    document.getElementById('memberDays').textContent = days;
+                }
+
+                // 其他統計數據 (暫時設為預設值)
+                document.getElementById('usageCount').textContent = '0';
+                document.getElementById('loginCount').textContent = '-';
+
+            } catch (error) {
+                console.error('載入統計資料失敗:', error);
+            }
+        }
+
+        // 綁定事件
+        function bindEvents() {
+            // 導航選單
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = e.currentTarget.dataset.section;
+                    switchSection(section);
+                });
+            });
+
+            // 基本資料表單
+            document.getElementById('basicForm').addEventListener('submit', handleBasicFormSubmit);
+
+            // 密碼表單
+            document.getElementById('passwordForm').addEventListener('submit', handlePasswordFormSubmit);
+
+            // 登出按鈕
+            document.getElementById('btnLogout').addEventListener('click', handleLogout);
+
+            // 頭像上傳
+            const fileInput = document.getElementById('avatarFile');
+            const triggerBtn = document.getElementById('avatarUploadBtn');
+            triggerBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const form = new FormData();
+                form.append('file', file);
+                form.append('type', 'avatar');
+                try {
+                    const res = await fetch('../api/upload/image', { method: 'POST', headers: authHeader(), body: form });
+                    const result = await res.json();
+                    if (result.success && result.data?.url) {
+                        // 更新使用者 avatar 欄位
+                        const updateRes = await fetch('../api/auth/profile', {
+                            method: 'PUT',
+                            headers: { ...authHeader(), 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ avatar: result.data.url })
+                        });
+                        const updateJson = await updateRes.json();
+                        if (updateJson.success) {
+                            // 重新取得 me
+                            const meRes = await fetch('../api/auth/me', { headers: authHeader() });
+                            const meJson = await meRes.json();
+                            if (meJson.success) {
+                                currentUser = meJson.data;
+                                loadUserProfile();
+                                showAlert('basicAlert', 'success', '頭像已更新！');
+                            }
+                        } else {
+                            showAlert('basicAlert', 'error', updateJson.message || '更新頭像失敗');
+                        }
+                    } else {
+                        showAlert('basicAlert', 'error', result.message || '上傳失敗');
+                    }
+                } catch (err) {
+                    showAlert('basicAlert', 'error', '網路錯誤，請稍後再試');
+                } finally {
+                    e.target.value = '';
+                }
+            });
+        }
+
+        // 切換區塊
+        function switchSection(section) {
+            // 更新導航狀態
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+
+            // 顯示對應區塊
+            document.querySelectorAll('.content-section').forEach(sec => {
+                sec.style.display = 'none';
+            });
+            document.getElementById(`${section}Section`).style.display = 'block';
+        }
+
+        // 處理基本資料表單提交
+        async function handleBasicFormSubmit(e) {
+            e.preventDefault();
+
+            const saveText = document.getElementById('basicSaveText');
+            const loading = document.getElementById('basicLoading');
+            const alert = document.getElementById('basicAlert');
+
+            // 顯示載入狀態
+            saveText.style.display = 'none';
+            loading.style.display = 'inline-block';
+            alert.style.display = 'none';
+
+            try {
+                const formData = {
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value
+                };
+
+                const res = await fetch('../api/auth/profile', {
+                    method: 'PUT',
+                    headers: { ...authHeader(), 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    showAlert('basicAlert', 'success', '個人資料更新成功！');
+                    // 重新載入用戶資料
+                    const userRes = await fetch('../api/auth/me', { headers: authHeader() });
+                    const userData = await userRes.json();
+                    if (userData.success) {
+                        currentUser = userData.data;
+                        loadUserProfile();
+                    }
+                } else {
+                    showAlert('basicAlert', 'error', result.message || '更新失敗，請稍後再試');
+                }
+            } catch (error) {
+                showAlert('basicAlert', 'error', '網路錯誤，請稍後再試');
+            } finally {
+                // 恢復按鈕狀態
+                saveText.style.display = 'inline';
+                loading.style.display = 'none';
+            }
+        }
+
+        // 處理密碼表單提交
+        async function handlePasswordFormSubmit(e) {
+            e.preventDefault();
+
+            const saveText = document.getElementById('passwordSaveText');
+            const loading = document.getElementById('passwordLoading');
+            const alert = document.getElementById('securityAlert');
+
+            // 驗證密碼
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                showAlert('securityAlert', 'error', '新密碼與確認密碼不一致');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showAlert('securityAlert', 'error', '新密碼長度至少需要6個字符');
+                return;
+            }
+
+            // 顯示載入狀態
+            saveText.style.display = 'none';
+            loading.style.display = 'inline-block';
+            alert.style.display = 'none';
+
+            try {
+                const formData = {
+                    current_password: document.getElementById('currentPassword').value,
+                    new_password: newPassword
+                };
+
+                const res = await fetch('../api/auth/change-password', {
+                    method: 'PUT',
+                    headers: { ...authHeader(), 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    showAlert('securityAlert', 'success', '密碼更新成功！');
+                    // 清空表單
+                    document.getElementById('passwordForm').reset();
+                } else {
+                    showAlert('securityAlert', 'error', result.message || '密碼更新失敗');
+                }
+            } catch (error) {
+                showAlert('securityAlert', 'error', '網路錯誤，請稍後再試');
+            } finally {
+                // 恢復按鈕狀態
+                saveText.style.display = 'inline';
+                loading.style.display = 'none';
+            }
+        }
+
+        // 登出處理
+        function handleLogout() {
+            localStorage.removeItem(LS_TOKEN);
+            localStorage.removeItem('authToken');
+            window.location.href = '../index.html';
+        }
+
+        // 顯示提示訊息
+        function showAlert(elementId, type, message) {
+            const alert = document.getElementById(elementId);
+            alert.className = `alert ${type}`;
+            alert.textContent = message;
+            alert.style.display = 'block';
+
+            // 3秒後自動隱藏
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
+        }
+
+        // 工具函數
+        function getRoleText(role) {
+            const roleMap = {
+                'customer': '一般會員',
+                'vendor': '廠商會員',
+                'admin': '管理員'
+            };
+            return roleMap[role] || role;
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'active': '啟用',
+                'pending': '待審核',
+                'inactive': '停用',
+                'suspended': '停權'
+            };
+            return statusMap[status] || status;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleString('zh-TW', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // 初始化頁面
+        init();
+    </script>
+</body>
+
+</html>

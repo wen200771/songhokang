@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>優惠券驗證 - 送嗨康</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .verify-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #FCA311;
+        }
+
+        .verify-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #FCA311, #F79009);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .verify-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .verify-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .coupon-info {
+            text-align: left;
+            margin-top: 15px;
+        }
+
+        .coupon-info div {
+            margin-bottom: 8px;
+        }
+
+        .qr-scanner {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .qr-scanner button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="verify-container">
+        <div class="logo">🎫</div>
+        <h1>優惠券驗證系統</h1>
+
+        <form id="verifyForm">
+            <div class="input-group">
+                <label for="verificationCode">驗證碼</label>
+                <input type="text" id="verificationCode" placeholder="請輸入驗證碼 (例: SHK001100014a2b)" required>
+            </div>
+
+            <button type="submit" class="verify-btn" id="verifyBtn">
+                🔍 驗證優惠券
+            </button>
+        </form>
+
+        <div class="qr-scanner">
+            <p style="color: #666; margin-bottom: 10px;">或者</p>
+            <button type="button" onclick="alert('QR Code掃描功能開發中...')">
+                📱 掃描QR Code
+            </button>
+        </div>
+
+        <div id="result" class="result">
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('verifyForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const verificationCode = document.getElementById('verificationCode').value.trim();
+            const verifyBtn = document.getElementById('verifyBtn');
+            const result = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+
+            if (!verificationCode) {
+                showResult('請輸入驗證碼', 'error');
+                return;
+            }
+
+            // 顯示載入狀態
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = '驗證中...';
+            result.style.display = 'none';
+
+            try {
+                const response = await fetch('api/coupons/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        verification_code: verificationCode
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // 驗證成功
+                    const coupon = data.coupon;
+                    const user = data.user;
+
+                    resultContent.innerHTML = `
+                        <h3>✅ 驗證成功！</h3>
+                        <div class="coupon-info">
+                            <div><strong>優惠券：</strong>${coupon.title}</div>
+                            <div><strong>用戶：</strong>${user.username} (${user.email})</div>
+                            <div><strong>折扣：</strong>${coupon.discount_value}${coupon.discount_type === 'percentage' ? '%' : '元'}</div>
+                            <div><strong>使用時間：</strong>${new Date(data.usage.used_at).toLocaleString('zh-TW')}</div>
+                            <div><strong>核銷時間：</strong>${new Date().toLocaleString('zh-TW')}</div>
+                        </div>
+                        <p style="margin-top: 15px; font-weight: 600;">請為客戶提供對應的優惠！</p>
+                    `;
+                    showResult('', 'success');
+
+                    // 清空輸入框
+                    document.getElementById('verificationCode').value = '';
+
+                } else {
+                    // 驗證失敗
+                    showResult(data.message || '驗證失敗', 'error');
+                }
+
+            } catch (error) {
+                console.error('驗證錯誤:', error);
+                showResult('網路錯誤，請稍後再試', 'error');
+            } finally {
+                // 恢復按鈕狀態
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = '🔍 驗證優惠券';
+            }
+        });
+
+        function showResult(message, type) {
+            const result = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+
+            if (message) {
+                resultContent.innerHTML = `<p>${message}</p>`;
+            }
+
+            result.className = `result ${type}`;
+            result.style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>

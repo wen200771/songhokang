@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>個人資料 - 送好康</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8f7f6 0%, #faf9f8 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* 頁面頭部 */
+        .header {
+            background: rgba(248, 247, 246, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .back-btn {
+            background: rgba(252, 163, 17, 0.1);
+            border: 1px solid rgba(252, 163, 17, 0.3);
+            color: #FCA311;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(252, 163, 17, 0.2);
+            border-color: rgba(252, 163, 17, 0.4);
+        }
+
+        /* 主要內容 */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* 個人資料卡片 */
+        .profile-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #FCA311 0%, #f59e0b 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            font-weight: 700;
+        }
+
+        .profile-info h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .profile-info .member-badge {
+            background: #FCA311;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: rgba(252, 163, 17, 0.1);
+            border-radius: 12px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #FCA311;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* 功能區塊 */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .section-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-action {
+            background: rgba(252, 163, 17, 0.1);
+            border: 1px solid rgba(252, 163, 17, 0.3);
+            color: #FCA311;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .section-action:hover {
+            background: rgba(252, 163, 17, 0.2);
+        }
+
+        /* 表單樣式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #FCA311;
+            box-shadow: 0 0 0 2px rgba(252, 163, 17, 0.2);
+        }
+
+        /* 列表樣式 */
+        .item-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .list-item:hover {
+            border-color: rgba(252, 163, 17, 0.3);
+            box-shadow: 0 2px 8px rgba(252, 163, 17, 0.1);
+        }
+
+        .item-info h4 {
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .item-info p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .item-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-used {
+            background: #f3f4f6;
+            color: #666;
+        }
+
+        /* 設定項目 */
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-info h4 {
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .setting-info p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .setting-control input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #FCA311;
+        }
+
+        /* 按鈕樣式 */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FCA311 0%, #f59e0b 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 12px rgba(252, 163, 17, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(156, 163, 175, 0.1);
+            border: 1px solid rgba(156, 163, 175, 0.3);
+            color: #6b7280;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(156, 163, 175, 0.2);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        /* 空狀態 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 16px;
+            }
+
+            .profile-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .main-container {
+                padding: 16px;
+            }
+
+            .profile-card,
+            .section-card {
+                padding: 20px;
+            }
+        }
+
+        /* 載入狀態 */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #FCA311;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 成功訊息 */
+        .success-message {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: #10b981;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s;
+        }
+
+        .success-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 頁面頭部 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <h1>👤 個人資料</h1>
+            </div>
+            <a href="index.html" class="back-btn">← 返回首頁</a>
+        </div>
+    </header>
+
+    <!-- 主要內容 -->
+    <div class="main-container">
+        <!-- 個人資料卡片 -->
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileAvatar">?</div>
+                <div>
+                    <input type="file" id="avatarFile" accept="image/*" style="display:none">
+                    <button class="btn btn-secondary" id="avatarUploadBtn" type="button">更換頭像</button>
+                    <div style="font-size:12px;color:#6b7280;margin-top:4px;">支援 JPG/PNG/WebP，建議 1:1</div>
+                </div>
+                <div class="profile-info">
+                    <h2 id="profileName">載入中...</h2>
+                    <div class="member-badge">一般會員</div>
+                    <p id="profileEmail" style="color: #666; font-size: 14px;">載入中...</p>
+                </div>
+            </div>
+
+            <div class="profile-stats" id="profileStats">
+                <div class="stat-item">
+                    <div class="stat-number" id="statFavorites">-</div>
+                    <div class="stat-label">收藏數量</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statHistory">-</div>
+                    <div class="stat-label">瀏覽記錄</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statUsed">-</div>
+                    <div class="stat-label">使用次數</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statDays">-</div>
+                    <div class="stat-label">會員天數</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能區塊 -->
+        <div class="content-grid">
+            <!-- 基本資料 -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-title">
+                        📝 基本資料
+                    </div>
+                    <button class="section-action" onclick="toggleEditMode()">編輯</button>
+                </div>
+
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label>用戶名</label>
+                        <input type="text" id="username" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>電子郵件</label>
+                        <input type="email" id="email" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>手機號碼</label>
+                        <input type="tel" id="phone" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>生日</label>
+                        <input type="date" id="birthday" readonly>
+                    </div>
+
+                    <div id="editActions" style="display: none; margin-top: 20px;">
+                        <button type="button" class="btn btn-secondary" onclick="cancelEdit()">取消</button>
+                        <button type="submit" class="btn btn-primary">儲存變更</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 我的收藏 -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-title">
+                        ❤️ 我的收藏
+                    </div>
+                    <button class="section-action" onclick="viewAllFavorites()">查看全部</button>
+                </div>
+
+                <div class="item-list" id="favoritesList">
+                    <div class="loading">載入中...</div>
+                </div>
+            </div>
+
+            <!-- 瀏覽記錄 -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-title">
+                        🕒 瀏覽記錄
+                    </div>
+                    <button class="section-action" onclick="clearHistory()">清除記錄</button>
+                </div>
+
+                <div class="item-list" id="historyList">
+                    <div class="loading">載入中...</div>
+                </div>
+            </div>
+
+            <!-- 使用記錄 -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-title">
+                        🎫 使用記錄
+                    </div>
+                    <button class="section-action" onclick="exportUsage()">匯出記錄</button>
+                </div>
+
+                <div class="item-list" id="usageList">
+                    <div class="loading">載入中...</div>
+                </div>
+            </div>
+
+            <!-- 安全設定 -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-title">
+                        🔒 安全設定
+                    </div>
+                </div>
+
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label>目前密碼</label>
+                        <input type="password" id="currentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label>新密碼</label>
+                        <input type="password" id="newPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label>確認新密碼</label>
+                        <input type="password" id="confirmPassword" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">變更密碼</button>
+                </form>
+            </div>
+
+            <!-- 個人設定 -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-title">
+                        ⚙️ 個人設定
+                    </div>
+                    <button class="section-action" onclick="resetSettings()">重設</button>
+                </div>
+
+                <div id="settingsList">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>電子郵件通知</h4>
+                            <p>接收優惠券到期提醒和新優惠通知</p>
+                        </div>
+                        <div class="setting-control">
+                            <input type="checkbox" id="emailNotifications" onchange="saveSettings()">
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>推播通知</h4>
+                            <p>接收瀏覽器推播通知</p>
+                        </div>
+                        <div class="setting-control">
+                            <input type="checkbox" id="pushNotifications" onchange="saveSettings()">
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>顯示瀏覽次數</h4>
+                            <p>在優惠券卡片上顯示瀏覽次數</p>
+                        </div>
+                        <div class="setting-control">
+                            <input type="checkbox" id="showViewCount" onchange="saveSettings()">
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h4>自動保存瀏覽記錄</h4>
+                            <p>自動記錄您瀏覽過的優惠券</p>
+                        </div>
+                        <div class="setting-control">
+                            <input type="checkbox" id="autoSaveHistory" onchange="saveSettings()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 常量定義 - 與主頁面保持一致
+        const LS_TOKEN = 'authToken_customer';
+        const LS_USER = 'authUser';
+        const LS_FAVORITES = 'favorites';
+        const LS_HISTORY = 'viewHistory';
+        const LS_USED_COUPONS = 'usedCoupons';
+        const LS_MEMBER_SETTINGS = 'memberSettings';
+
+        // 角色專屬 token 鍵值（支援多會話）
+        const ROLE_TOKENS = {
+            admin: 'authToken_admin',
+            vendor: 'authToken_vendor',
+            customer: 'authToken_customer'
+        };
+
+        // 全域變數
+        let isEditMode = false;
+        let userData = null;
+
+        // 獲取頁面特定的切換狀態鍵值
+        function getPageSwitchKey() {
+            const path = window.location.pathname;
+            if (path.includes('vendor')) return 'switched_from_admin_vendor';
+            if (path.includes('admin')) return 'switched_from_admin_admin';
+            return 'switched_from_admin_customer'; // 前台頁面
+        }
+
+        // 檢查是否為管理員切換的會話
+        function isAdminSwitchedSession() {
+            const pageSwitchKey = getPageSwitchKey();
+            return localStorage.getItem(pageSwitchKey) !== null;
+        }
+
+        // 智能獲取 token - 優先使用切換會話的 token
+        function getToken() {
+            // 如果是管理員切換會話，優先使用切換的 token
+            if (isAdminSwitchedSession()) {
+                const pageSwitchKey = getPageSwitchKey();
+                const switchInfo = localStorage.getItem(pageSwitchKey);
+                if (switchInfo) {
+                    try {
+                        const info = JSON.parse(switchInfo);
+                        console.log('使用切換會話的 token，目標角色:', info.targetRole);
+                        // 直接使用通用 token 鍵值，因為切換時已經設置了
+                        return localStorage.getItem(LS_TOKEN);
+                    } catch (e) {
+                        console.error('解析切換資訊失敗:', e);
+                    }
+                }
+            }
+
+            // 正常情況下使用一般用戶 token
+            return localStorage.getItem(LS_TOKEN);
+        }
+
+        function isLoggedIn() {
+            return !!getToken();
+        }
+
+        let currentUser = null;
+
+        function showSuccessMessage(message) {
+            const existingMessage = document.querySelector('.success-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            const messageEl = document.createElement('div');
+            messageEl.className = 'success-message';
+            messageEl.textContent = message;
+            document.body.appendChild(messageEl);
+
+            setTimeout(() => messageEl.classList.add('show'), 100);
+            setTimeout(() => {
+                messageEl.classList.remove('show');
+                setTimeout(() => messageEl.remove(), 300);
+            }, 3000);
+        }
+
+        // 檢查用戶認證並載入資料
+        async function checkAuthAndLoadUser() {
+            if (!isLoggedIn()) {
+                window.location.href = 'index.html';
+                return false;
+            }
+
+            try {
+                const response = await fetch('api/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        currentUser = data.data;
+                        try { localStorage.setItem(LS_USER, JSON.stringify(currentUser)); } catch { }
+                        return true;
+                    }
+                }
+
+                // 認證失敗，清除相關 token 並跳轉
+                localStorage.removeItem(LS_TOKEN);
+                localStorage.removeItem(LS_USER);
+
+                // 如果是切換會話，也清除切換狀態
+                if (isAdminSwitchedSession()) {
+                    const pageSwitchKey = getPageSwitchKey();
+                    localStorage.removeItem(pageSwitchKey);
+                }
+
+                window.location.href = 'index.html';
+                return false;
+            } catch (error) {
+                console.error('認證檢查失敗:', error);
+                window.location.href = 'index.html';
+                return false;
+            }
+        }
+
+        // 載入用戶資料
+        async function loadUserData() {
+            const authSuccess = await checkAuthAndLoadUser();
+            if (!authSuccess || !currentUser) return;
+
+            console.log('載入用戶資料:', currentUser);
+
+            // 更新基本資訊
+            document.getElementById('profileName').textContent = currentUser.username || '未設定';
+            document.getElementById('profileEmail').textContent = currentUser.email || '未設定';
+            const avatarEl = document.getElementById('profileAvatar');
+            if (currentUser.avatar) {
+                const url = currentUser.avatar.startsWith('http') ? currentUser.avatar : (currentUser.avatar.startsWith('/') ? currentUser.avatar : ('/' + currentUser.avatar));
+                avatarEl.style.background = `center/cover no-repeat url(${url})`;
+                avatarEl.textContent = '';
+            } else {
+                avatarEl.style.background = 'linear-gradient(135deg, #FCA311 0%, #f59e0b 100%)';
+                avatarEl.textContent = (currentUser.username || currentUser.email || '?')[0].toUpperCase();
+            }
+
+            // 更新表單
+            document.getElementById('username').value = currentUser.username || '';
+            document.getElementById('email').value = currentUser.email || '';
+            document.getElementById('phone').value = currentUser.phone || '';
+            document.getElementById('birthday').value = currentUser.birthday || '';
+
+            // 載入統計資料
+            loadStats();
+
+            // 載入各項資料
+            loadFavorites();
+            loadHistory();
+            loadUsageHistory();
+            loadSettings();
+        }
+
+        // 載入統計資料
+        function loadStats() {
+            const favorites = JSON.parse(localStorage.getItem(LS_FAVORITES) || '[]');
+            const history = JSON.parse(localStorage.getItem(LS_HISTORY) || '[]');
+            const used = JSON.parse(localStorage.getItem(LS_USED_COUPONS) || '[]');
+
+            document.getElementById('statFavorites').textContent = favorites.length;
+            document.getElementById('statHistory').textContent = history.length;
+            document.getElementById('statUsed').textContent = used.length;
+
+            // 計算會員天數（假設註冊日期）
+            try {
+                const created = currentUser?.created_at ? new Date(currentUser.created_at) : null;
+                const today = new Date();
+                const days = created ? Math.max(1, Math.floor((today - created) / (1000 * 60 * 60 * 24))) : 1;
+                document.getElementById('statDays').textContent = String(days);
+            } catch { document.getElementById('statDays').textContent = '1'; }
+        }
+
+        // 載入收藏列表
+        async function loadFavorites() {
+            const container = document.getElementById('favoritesList');
+
+            try {
+                if (isLoggedIn()) {
+                    const res = await fetch('api/favorites', {
+                        headers: { 'Authorization': `Bearer ${getToken()}` }
+                    });
+                    const json = await res.json();
+
+                    if (json.success && json.data?.favorites) {
+                        renderFavoritesList(json.data.favorites.slice(0, 5)); // 只顯示前5個
+                        return;
+                    }
+                }
+
+                // 從 localStorage 載入
+                const favorites = JSON.parse(localStorage.getItem(LS_FAVORITES) || '[]');
+                renderFavoritesList(favorites.slice(0, 5));
+
+            } catch (error) {
+                console.error('載入收藏失敗:', error);
+                container.innerHTML = '<div class="empty-state"><div class="icon">❤️</div><p>載入失敗</p></div>';
+            }
+        }
+
+        function renderFavoritesList(favorites) {
+            const container = document.getElementById('favoritesList');
+
+            if (favorites.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">❤️</div><p>還沒有收藏任何優惠券</p></div>';
+                return;
+            }
+
+            container.innerHTML = favorites.map(fav => `
+                <div class="list-item">
+                    <div class="item-info">
+                        <h4>${fav.title}</h4>
+                        <p>${fav.storeName} • 收藏於 ${new Date(fav.addedAt || Date.now()).toLocaleDateString('zh-TW')}</p>
+                    </div>
+                    <div class="item-status status-active">收藏中</div>
+                </div>
+            `).join('');
+        }
+
+        // 載入瀏覽記錄
+        function loadHistory() {
+            const container = document.getElementById('historyList');
+            const history = JSON.parse(localStorage.getItem(LS_HISTORY) || '[]');
+
+            if (history.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">🕒</div><p>還沒有瀏覽記錄</p></div>';
+                return;
+            }
+
+            // 只顯示最近5筆
+            const recentHistory = history.slice(0, 5);
+
+            container.innerHTML = recentHistory.map(item => `
+                <div class="list-item">
+                    <div class="item-info">
+                        <h4>${item.title}</h4>
+                        <p>${item.storeName} • 瀏覽於 ${new Date(item.timestamp).toLocaleDateString('zh-TW')}</p>
+                    </div>
+                    <div class="item-status status-active">已瀏覽</div>
+                </div>
+            `).join('');
+        }
+
+        // 載入使用記錄
+        function loadUsageHistory() {
+            const container = document.getElementById('usageList');
+            const used = JSON.parse(localStorage.getItem(LS_USED_COUPONS) || '[]');
+
+            if (used.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">🎫</div><p>還沒有使用任何優惠券</p></div>';
+                return;
+            }
+
+            // 只顯示最近5筆
+            const recentUsed = used.slice(0, 5);
+
+            container.innerHTML = recentUsed.map(item => `
+                <div class="list-item">
+                    <div class="item-info">
+                        <h4>${item.title}</h4>
+                        <p>${item.storeName} • 使用於 ${new Date(item.usedAt).toLocaleDateString('zh-TW')}</p>
+                    </div>
+                    <div class="item-status status-used">已使用</div>
+                </div>
+            `).join('');
+        }
+
+        // 載入設定
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem(LS_MEMBER_SETTINGS) || '{}');
+            const defaults = {
+                emailNotifications: true,
+                pushNotifications: false,
+                showViewCount: true,
+                autoSaveHistory: true
+            };
+
+            const finalSettings = { ...defaults, ...settings };
+
+            document.getElementById('emailNotifications').checked = finalSettings.emailNotifications;
+            document.getElementById('pushNotifications').checked = finalSettings.pushNotifications;
+            document.getElementById('showViewCount').checked = finalSettings.showViewCount;
+            document.getElementById('autoSaveHistory').checked = finalSettings.autoSaveHistory;
+        }
+
+        // 編輯模式切換
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const inputs = document.querySelectorAll('#profileForm input');
+            const editActions = document.getElementById('editActions');
+            const editBtn = document.querySelector('.section-action');
+
+            inputs.forEach(input => {
+                if (input.id !== 'email') { // 郵箱通常不允許修改
+                    input.readOnly = !isEditMode;
+                }
+            });
+
+            editActions.style.display = isEditMode ? 'block' : 'none';
+            editBtn.textContent = isEditMode ? '取消' : '編輯';
+        }
+
+        function cancelEdit() {
+            toggleEditMode();
+            loadUserData(); // 重新載入原始資料
+        }
+
+        // 儲存個人資料
+        async function saveProfile(event) {
+            event.preventDefault();
+
+            const formData = {
+                username: document.getElementById('username').value,
+                phone: document.getElementById('phone').value,
+                birthday: document.getElementById('birthday').value
+            };
+
+            try {
+                const res = await fetch('api/auth/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const json = await res.json();
+
+                if (json.success) {
+                    showSuccessMessage('個人資料更新成功');
+                    toggleEditMode();
+                    loadUserData();
+                } else {
+                    showSuccessMessage('更新失敗：' + (json.message || '未知錯誤'));
+                }
+            } catch (error) {
+                console.error('更新個人資料失敗:', error);
+                showSuccessMessage('更新失敗，請稍後再試');
+            }
+        }
+
+        // 變更密碼
+        async function changePassword(event) {
+            event.preventDefault();
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                showSuccessMessage('新密碼與確認密碼不符');
+                return;
+            }
+
+            try {
+                const res = await fetch('api/auth/change-password', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+
+                const json = await res.json();
+
+                if (json.success) {
+                    showSuccessMessage('密碼變更成功');
+                    document.getElementById('passwordForm').reset();
+                } else {
+                    showSuccessMessage('密碼變更失敗：' + (json.message || '未知錯誤'));
+                }
+            } catch (error) {
+                console.error('變更密碼失敗:', error);
+                showSuccessMessage('變更失敗，請稍後再試');
+            }
+        }
+
+        // 儲存設定
+        function saveSettings() {
+            const settings = {
+                emailNotifications: document.getElementById('emailNotifications').checked,
+                pushNotifications: document.getElementById('pushNotifications').checked,
+                showViewCount: document.getElementById('showViewCount').checked,
+                autoSaveHistory: document.getElementById('autoSaveHistory').checked
+            };
+
+            localStorage.setItem(LS_MEMBER_SETTINGS, JSON.stringify(settings));
+            showSuccessMessage('設定已儲存');
+        }
+
+        // 重設設定
+        function resetSettings() {
+            if (confirm('確定要重設所有設定為預設值嗎？')) {
+                localStorage.removeItem(LS_MEMBER_SETTINGS);
+                loadSettings();
+                showSuccessMessage('設定已重設為預設值');
+            }
+        }
+
+        // 其他功能
+        function viewAllFavorites() {
+            window.location.href = 'index.html?view=favorites';
+        }
+
+        function clearHistory() {
+            if (confirm('確定要清除所有瀏覽記錄嗎？')) {
+                localStorage.removeItem(LS_HISTORY);
+                loadHistory();
+                loadStats();
+                showSuccessMessage('瀏覽記錄已清除');
+            }
+        }
+
+        function exportUsage() {
+            const used = JSON.parse(localStorage.getItem(LS_USED_COUPONS) || '[]');
+            if (used.length === 0) {
+                showSuccessMessage('沒有使用記錄可匯出');
+                return;
+            }
+
+            const csvContent = "data:text/csv;charset=utf-8,"
+                + "優惠券名稱,店家名稱,使用時間\n"
+                + used.map(item => `"${item.title}","${item.storeName}","${new Date(item.usedAt).toLocaleString('zh-TW')}"`).join('\n');
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `使用記錄_${new Date().toLocaleDateString('zh-TW')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showSuccessMessage('使用記錄已匯出');
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            // 檢查登入狀態
+            if (!isLoggedIn()) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 載入用戶資料
+            loadUserData();
+
+            // 綁定事件
+            document.getElementById('profileForm').addEventListener('submit', saveProfile);
+            document.getElementById('passwordForm').addEventListener('submit', changePassword);
+
+            // 頭像上傳
+            const avatarBtn = document.getElementById('avatarUploadBtn');
+            const avatarFile = document.getElementById('avatarFile');
+            if (avatarBtn && avatarFile) {
+                avatarBtn.addEventListener('click', () => avatarFile.click());
+                avatarFile.addEventListener('change', async (e) => {
+                    const file = e.target.files && e.target.files[0];
+                    if (!file) return;
+                    try {
+                        const form = new FormData();
+                        form.append('file', file);
+                        form.append('type', 'avatar');
+                        const upRes = await fetch('api/upload/image', { method: 'POST', headers: { 'Authorization': `Bearer ${getToken()}` }, body: form });
+                        const upJson = await upRes.json();
+                        if (!upJson.success) { alert(upJson.message || '上傳失敗'); return; }
+                        const url = upJson.data?.url;
+                        const saveRes = await fetch('api/auth/profile', { method: 'PUT', headers: { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ avatar: url }) });
+                        const saveJson = await saveRes.json();
+                        if (saveJson.success) { try { localStorage.setItem(LS_USER, JSON.stringify({ ...(getUser() || {}), avatar: url })); } catch { } await loadUserData(); showSuccessMessage('頭像已更新'); }
+                        else { alert(saveJson.message || '更新頭像失敗'); }
+                    } catch (err) { console.error(err); alert('發生錯誤，請稍後再試'); }
+                    finally { e.target.value = ''; }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

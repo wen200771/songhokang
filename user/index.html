@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>送齁康 - 會員中心</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: #f7f7f9;
+            margin: 0
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 16px auto;
+            padding: 0 16px
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        thead th {
+            background: #f3f4f6;
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #e5e7eb
+        }
+
+        tbody td {
+            padding: 10px;
+            border-bottom: 1px solid #f3f4f6
+        }
+
+        .btn {
+            border: 1px solid #d1d5db;
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>送齁康 - 會員中心</div>
+        <div style="display:flex;gap:8px;align-items:center">
+            <a href="profile.html" class="btn" style="text-decoration:none">個人資料</a>
+            <button id="btnLogout" class="btn">登出</button>
+        </div>
+    </div>
+    <div class="container">
+        <div id="guard" class="card" style="display:none">請先登入。</div>
+        <div id="content" style="display:none">
+            <div class="card">
+                <div style="font-weight:700;margin-bottom:6px">個人資訊</div>
+                <div id="me">載入中...</div>
+            </div>
+            <div class="card">
+                <div style="font-weight:700;margin-bottom:6px">我的收藏</div>
+                <div style="overflow:auto">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:64px">ID</th>
+                                <th>標題</th>
+                                <th>店家</th>
+                                <th style="width:160px">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="favRows">
+                            <tr>
+                                <td colspan="4" style="text-align:center;color:#777">載入中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const LS_TOKEN = 'authToken_user';
+        const token = localStorage.getItem(LS_TOKEN) || localStorage.getItem('authToken') || '';
+        const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+
+        async function guard() {
+            if (!token) { document.getElementById('guard').style.display = 'block'; return false; }
+            try {
+                const r = await fetch('../api/auth/me', { headers });
+                const j = await r.json();
+                if (!j.success) { document.getElementById('guard').style.display = 'block'; return false; }
+                document.getElementById('me').textContent = `${j.data.username} (${j.data.email})`;
+                return true;
+            } catch { return false; }
+        }
+
+        async function loadFavorites() {
+            try {
+                const r = await fetch('../api/favorites', { headers });
+                const j = await r.json();
+                const list = j?.data?.favorites || [];
+                const tbody = document.getElementById('favRows');
+                tbody.innerHTML = '';
+                if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#777">尚無收藏</td></tr>'; return; }
+                list.forEach(c => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${c.id}</td><td>${c.title || ''}</td><td>${c.storeName || ''}</td><td><button data-id="${c.id}" class="btn btn-remove">取消收藏</button></td>`;
+                    tbody.appendChild(tr);
+                });
+                tbody.addEventListener('click', async (e) => {
+                    const btn = e.target.closest('.btn-remove'); if (!btn) return;
+                    const id = Number(btn.getAttribute('data-id'));
+                    await fetch(`../api/favorites/${id}`, { method: 'DELETE', headers });
+                    await loadFavorites();
+                });
+            } catch {
+                document.getElementById('favRows').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#777">載入失敗</td></tr>';
+            }
+        }
+
+        document.getElementById('btnLogout').onclick = () => { localStorage.removeItem(LS_TOKEN); location.href = './login.html'; };
+
+        (async function init() {
+            const ok = await guard();
+            if (!ok) return;
+            document.getElementById('guard').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            await loadFavorites();
+        })();
+    </script>
+</body>
+
+</html>

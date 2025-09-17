@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>廠商登入</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: #f7f7f9;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            width: 360px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, .06)
+        }
+
+        .title {
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-align: center
+        }
+
+        .input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            margin: 6px 0
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #111827;
+            background: #111827;
+            color: #fff;
+            cursor: pointer;
+            margin-top: 8px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="title">廠商登入</div>
+        <input id="u" class="input" placeholder="帳號/Email">
+        <input id="p" type="password" class="input" placeholder="密碼">
+        <button class="btn" id="loginBtn">登入並開啟廠商中心</button>
+    </div>
+    <script>
+        const KEY = 'authToken_vendor';
+        document.getElementById('loginBtn').onclick = async () => {
+            const username = document.getElementById('u').value.trim();
+            const password = document.getElementById('p').value;
+            if (!username || !password) { alert('請輸入帳密'); return; }
+            try {
+                const r = await fetch('../api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+                const j = await r.json();
+                if (j.success && ['vendor', 'admin'].includes((j.data?.user?.role || '').toLowerCase())) {
+                    localStorage.setItem(KEY, j.data.token);
+                    alert('登入成功');
+                    location.href = './';
+                } else { alert(j.message || '登入失敗（需廠商或管理員身分）'); }
+            } catch { alert('登入失敗'); }
+        };
+    </script>
+</body>
+
+</html>

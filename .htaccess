@@ -1,0 +1,25 @@
+RewriteEngine On
+
+# API 路由重寫
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/index.php [QSA,L]
+
+# 其他靜態文件直接提供
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(.*)$ $1 [L]
+
+# 預設首頁
+DirectoryIndex index.html
+
+# 設置 MIME 類型
+AddType application/json .json
+
+# 允許跨域請求（開發環境）
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+
+# 處理預檢請求
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
