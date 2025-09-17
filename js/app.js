@@ -117,7 +117,7 @@
 
                 coupons.push({
                     id: i,
-                    image: `img/送好康文宣素材 (${i}).jpg`,
+                    image: `img/送齁康文宣素材 (${i}).jpg`,
                     storeName: `${storeType}${i}`,
                     category: category,
                     title: `限時優惠活動 ${i}`,
@@ -139,7 +139,7 @@
                 if (Array.isArray(items) && items.length > 0) {
                     coupons = items.map((item, idx) => ({
                         id: item.id || idx + 1,
-                        image: item.image && item.image.trim() !== '' ? item.image : `img/送好康文宣素材 (${(idx % 50) + 1}).jpg`,
+                        image: item.image && item.image.trim() !== '' ? item.image : `img/送齁康文宣素材 (${(idx % 50) + 1}).jpg`,
                         storeName: item.storeName || '合作店家',
                         category: item.category || '一般優惠',
                         title: item.title || '優惠活動',
@@ -791,7 +791,7 @@
                         // 轉換API資料格式
                         const searchResults = items.map((item, idx) => ({
                             id: item.id || idx + 1,
-                            image: item.image && item.image.trim() !== '' ? item.image : `img/送好康文宣素材 (${(idx % 50) + 1}).jpg`,
+                            image: item.image && item.image.trim() !== '' ? item.image : `img/送齁康文宣素材 (${(idx % 50) + 1}).jpg`,
                             storeName: item.storeName || '合作店家',
                             category: item.category || '一般優惠',
                             title: item.title || '優惠活動',
@@ -1293,7 +1293,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = '送好康_我的資料.json';
+            a.download = '送齁康_我的資料.json';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

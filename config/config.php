@@ -1,7 +1,7 @@
 <?php
 /**
  * 系統配置文件
- * 送好康優惠券平台
+ * 送齁康優惠券平台
  */
 
 // 錯誤報告設定
@@ -12,7 +12,7 @@ ini_set('display_errors', 1);
 date_default_timezone_set('Asia/Taipei');
 
 // 系統常數定義
-define('APP_NAME', '送好康');
+define('APP_NAME', '送齁康');
 define('APP_VERSION', '1.0.0');
 define('BASE_URL', 'http://localhost:8000'); // 本機開發網址
 define('UPLOAD_PATH', 'uploads/');

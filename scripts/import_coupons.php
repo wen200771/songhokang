@@ -83,7 +83,7 @@ try {
     
     // 處理優惠券素材
     for ($i = 1; $i <= $totalCoupons; $i++) {
-        $imageFileName = "送好康文宣素材 ($i).jpg";
+        $imageFileName = "送齁康文宣素材 ($i).jpg";
         $imagePath = "img/$imageFileName";
         
         // 檢查圖片檔案是否存在
