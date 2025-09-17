@@ -1,12 +1,15 @@
-        // ?��?紀?�管??        let searchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+        // 搜尋紀錄管理
+        let searchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
 
         function saveSearchHistory(query) {
             if (!query.trim()) return;
 
-            // 移除?��??�目
+            // 移除重複項目
             searchHistory = searchHistory.filter(item => item !== query);
-            // 添�??��???            searchHistory.unshift(query);
-            // ?�制?�多�?�?0筆�???            searchHistory = searchHistory.slice(0, 10);
+            // 添加到開頭
+            searchHistory.unshift(query);
+            // 限制最多保存10筆紀錄
+            searchHistory = searchHistory.slice(0, 10);
 
             localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
             renderSearchHistory();
@@ -35,11 +38,11 @@
                 historyItem.className = 'search-history-item';
                 historyItem.innerHTML = `
                     <div class="search-history-content" onclick="selectSearchHistory('${query}')">
-                        <span class="search-history-icon">??</span>
+                        <span class="search-history-icon">🕒</span>
                         <span class="search-history-text">${query}</span>
                     </div>
-                    <div class="search-history-delete" onclick="event.stopPropagation(); removeSearchHistory('${query}')" title="?�除">
-                        ?
+                    <div class="search-history-delete" onclick="event.stopPropagation(); removeSearchHistory('${query}')" title="刪除">
+                        ×
                     </div>
                 `;
                 historyContainer.appendChild(historyItem);
@@ -54,14 +57,16 @@
             closeSearchDropdown();
         }
 
-        // ?�中?��?籤陣??        let selectedTags = [];
+        // 選中的標籤陣列
+        let selectedTags = [];
         let currentCoupon = null;
         let currentView = 'home';
 
-        // ?�地?��??��?
-        // ?�台使用?��???token key，避?��?管�??��??��?�?        const LS_TOKEN = 'authToken_customer';
+        // 本地儲存鍵名
+        // 前台使用獨立的 token key，避免與管理員後台衝突
+        const LS_TOKEN = 'authToken_customer';
         const LS_USER = 'authUser';
-        // 額�??�測試�?段�?供�??��??��?�?token，�?許�?裝置?��??�入
+        // 額外為測試階段提供三個角色專屬 token，允許同裝置同時登入
         const ROLE_TOKENS = {
             admin: 'authToken_admin',
             vendor: 'authToken_vendor',
@@ -70,7 +75,7 @@
         const LS_FAVORITES = 'favorites';
         const LS_HISTORY = 'viewHistory';
 
-        // 視�??�?��??�斷
+        // 視圖狀態與判斷
         function setView(mode) {
             currentView = mode === 'favorites' ? 'favorites' : 'home';
             const url = new URL(location.href);
@@ -90,21 +95,21 @@
         function clearAuth() { localStorage.removeItem(LS_TOKEN); localStorage.removeItem(LS_USER); updateLoginUI(); }
         function isLoggedIn() { return !!getToken(); }
 
-        // ?��??��??��?將由 API 填�?；若 API ?��??��?使用?�地?��??��?
+        // 優惠券資料（將由 API 填充；若 API 無資料則使用本地假資料）
         let coupons = [];
         let currentUser = null;
 
-        // ?��??��??��?作為 API ?��??��??��??��?
+        // 生成假資料（作為 API 無資料時的後備）
         function buildDummyCoupons() {
             coupons = [];
-            const categories = ['美�?餐飲', '購物?��?', '美容保�?', '休�?娛�?', '?��?住宿', '?�康?��?'];
+            const categories = ['美食餐飲', '購物商城', '美容保養', '休閒娛樂', '旅遊住宿', '健康醫療'];
             const storeTypes = {
-                '美�?餐飲': ['餐廳', '?�啡�?, '小�?�?, '?��?�?, '?�烤�?],
-                '購物?��?': ['?�飾�?, '3C�?��', '?��?', '超�?', '?�貨'],
-                '美容保�?': ['美髮沙�?', '美甲�?, 'SPA?�館', '美容??, '?�摩�?],
-                '休�?娛�?': ['KTV', '?�影??, '?�戲??, '網�?', '保齡?�館'],
-                '?��?住宿': ['飯�?', '民宿', '?��?�?, '租�?�?, '?��?'],
-                '?�康?��?': ['診�?', '?��?', '?�身??, '?��??�室', '?��?治�?']
+                '美食餐飲': ['餐廳', '咖啡廳', '小吃店', '火鍋店', '燒烤店'],
+                '購物商城': ['服飾店', '3C賣場', '書店', '超市', '百貨'],
+                '美容保養': ['美髮沙龍', '美甲店', 'SPA會館', '美容院', '按摩店'],
+                '休閒娛樂': ['KTV', '電影院', '遊戲場', '網咖', '保齡球館'],
+                '旅遊住宿': ['飯店', '民宿', '旅行社', '租車行', '景點'],
+                '健康醫療': ['診所', '藥局', '健身房', '瑜珈教室', '物理治療']
             };
             for (let i = 1; i <= 50; i++) {
                 const category = categories[Math.floor(Math.random() * categories.length)];
@@ -112,20 +117,20 @@
 
                 coupons.push({
                     id: i,
-                    image: `img/?�好康�?�????(${i}).jpg`,
+                    image: `img/送好康文宣素材 (${i}).jpg`,
                     storeName: `${storeType}${i}`,
                     category: category,
-                    title: `?��??��?活�? ${i}`,
-                    description: `?�是�?{i}?�優?�券?�詳細說?��??�含?�種使用條件?��??�。`,
+                    title: `限時優惠活動 ${i}`,
+                    description: `這是第${i}個優惠券的詳細說明，包含各種使用條件和限制。`,
                     expiry: '2024/12/31',
-                    usage: '每人?�用一�?,
-                    address: `?��?市信義�?信義路�?�?{i}?�`,
+                    usage: '每人限用一次',
+                    address: `台北市信義區信義路五段${i}號`,
                     phone: `02-2${String(i).padStart(3, '0')}-${String(i * 10).padStart(4, '0')}`
                 });
             }
         }
 
-        // �?API 載入資�?
+        // 從 API 載入資料
         async function loadCouponsFromApi() {
             try {
                 const res = await fetch('api/coupons?page=1&pageSize=50');
@@ -134,13 +139,13 @@
                 if (Array.isArray(items) && items.length > 0) {
                     coupons = items.map((item, idx) => ({
                         id: item.id || idx + 1,
-                        image: item.image && item.image.trim() !== '' ? item.image : `img/?�好康�?�????(${(idx % 50) + 1}).jpg`,
-                        storeName: item.storeName || '?��?店家',
-                        category: item.category || '一?�優??,
-                        title: item.title || '?��?活�?',
-                        description: item.description || '詳�?請�?活�?說�???,
+                        image: item.image && item.image.trim() !== '' ? item.image : `img/送好康文宣素材 (${(idx % 50) + 1}).jpg`,
+                        storeName: item.storeName || '合作店家',
+                        category: item.category || '一般優惠',
+                        title: item.title || '優惠活動',
+                        description: item.description || '詳情請見活動說明。',
                         expiry: item.expiry || '',
-                        usage: item.usage || '每人?�用一�?,
+                        usage: item.usage || '每人限用一次',
                         address: item.address || '',
                         phone: item.phone || ''
                     }));
@@ -155,22 +160,22 @@
             }
         }
 
-        // �?API 載入?��?並渲?�到?��?下�??�進�?篩選
+        // 從 API 載入分類並渲染到搜尋下拉與進階篩選
         async function loadCategories() {
             try {
                 const res = await fetch('api/categories?active=1');
                 const json = await res.json();
                 const items = Array.isArray(json?.data) ? json.data : json?.data?.items || [];
                 const categories = items.length > 0 ? items : [
-                    { name: '美�?餐飲', icon: '?���? },
-                    { name: '購物?��?', icon: '??�? },
-                    { name: '美容保�?', icon: '??' },
-                    { name: '休�?娛�?', icon: '?��' },
-                    { name: '?��?住宿', icon: '?��?' },
-                    { name: '?�康?��?', icon: '?��' }
+                    { name: '美食餐飲', icon: '🍽️' },
+                    { name: '購物商城', icon: '🛍️' },
+                    { name: '美容保養', icon: '💄' },
+                    { name: '休閒娛樂', icon: '🎮' },
+                    { name: '旅遊住宿', icon: '✈️' },
+                    { name: '健康醫療', icon: '🏥' }
                 ];
 
-                // ?��?下�?：�?類瀏覽 chips
+                // 搜尋下拉：分類瀏覽 chips
                 const grid = document.getElementById('searchCategoryGrid');
                 if (grid) {
                     grid.innerHTML = categories.map(cat => `
@@ -180,7 +185,7 @@
                         </div>
                     `).join('');
 
-                    // 綁�?點�?事件
+                    // 綁定點擊事件
                     grid.querySelectorAll('.category-chip').forEach(item => {
                         item.addEventListener('click', () => {
                             const categoryText = item.querySelector('.category-chip-text').textContent;
@@ -192,7 +197,7 @@
                     });
                 }
 
-                // ?��?篩選：checkbox ?�表
+                // 進階篩選：checkbox 列表
                 const filters = document.getElementById('categoryFilters');
                 if (filters) {
                     filters.innerHTML = categories.map(cat => `
@@ -202,20 +207,23 @@
                     `).join('');
                 }
             } catch (e) {
-                // ?��?失�??�可，�??�用?�設?��???            }
+                // 靜默失敗即可，仍可用預設假資料
+            }
         }
 
-        // 渲�??��??�卡??- Pinterest 風格
+        // 渲染優惠券卡片 - Pinterest 風格
         function renderCoupons(couponsToRender = coupons) {
             const container = document.getElementById('masonryContainer');
             container.classList.remove('empty');
             container.innerHTML = '';
 
-            // 如�??�收?��??��??�顯示收?��??��???            if (isFavoritesView()) {
+            // 如果是收藏視圖，只顯示收藏的優惠券
+            if (isFavoritesView()) {
                 const favoriteIds = new Set(getFavorites());
                 couponsToRender = couponsToRender.filter(coupon => favoriteIds.has(coupon.id));
 
-                // 如�?沒�??��??�優?�券，顯示空?�??                if (couponsToRender.length === 0) {
+                // 如果沒有收藏的優惠券，顯示空狀態
+                if (couponsToRender.length === 0) {
                     renderEmptyFavorites();
                     return;
                 }
@@ -228,13 +236,13 @@
                 card.addEventListener('click', (ev) => {
                     const t = ev.target;
                     if (t.closest('[data-action="quick-fav"]') || t.closest('[data-action="remove-fav"]')) {
-                        // 點�??��??�移?�收?��??��?詳�?
+                        // 點擊愛心或移除收藏不開啟詳情
                         return;
                     }
                     openModal(coupon);
                 });
 
-                // 添�?載入?�畫
+                // 添加載入動畫
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(20px)';
 
@@ -246,15 +254,15 @@
                         <source srcset="${webp}" type="image/webp">
                         <img src="${coupon.image}" alt="${coupon.title}" class="coupon-image" loading="lazy" decoding="async" width="800" height="1200">
                     </picture>
-                    <button class="fav-btn ${isFav ? 'active' : ''}" data-action="quick-fav" data-id="${coupon.id}">${isFav ? '?? : '??}</button>
+                    <button class="fav-btn ${isFav ? 'active' : ''}" data-action="quick-fav" data-id="${coupon.id}">${isFav ? '❤' : '♡'}</button>
                     <div class="coupon-overlay">
-                        <button class="view-btn">?��??��?</button>
+                        <button class="view-btn">查看優惠</button>
                     </div>
                 `;
 
                 container.appendChild(card);
 
-                // 延遲顯示?�畫
+                // 延遲顯示動畫
                 setTimeout(() => {
                     card.style.transition = 'all 0.4s ease';
                     card.style.opacity = '1';
@@ -263,47 +271,47 @@
             });
         }
 
-        // ?��??��??�空?��??�面
+        // 我的收藏為空時的畫面
         function renderEmptyFavorites() {
             const container = document.getElementById('masonryContainer');
             container.classList.add('empty');
             container.innerHTML = `
                 <div style="display:flex;align-items:center;justify-content:center;width:100%;min-height:40vh;">
                     <div style="max-width:640px;width:90%;background:rgba(248,247,246,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(252,163,17,0.2);border-radius:24px;padding:32px;box-shadow:0 12px 40px rgba(252,163,17,0.15), inset 0 1px 0 rgba(255,255,255,0.9);text-align:center;">
-                        <div style="font-size:20px;color:#333;font-weight:700;margin-bottom:8px;">?��?沒�??��?</div>
-                        <div style="font-size:14px;color:#666;margin-bottom:18px;">?�以?�卡?�右上�?�?<span style=\"color:#e60023\">??/span> ?�入?��?</div>
-                        <button class="btn-primary" id="backToHomeBtn">?�到首�?</button>
+                        <div style="font-size:20px;color:#333;font-weight:700;margin-bottom:8px;">目前沒有收藏</div>
+                        <div style="font-size:14px;color:#666;margin-bottom:18px;">可以在卡片右上角點 <span style=\"color:#e60023\">❤</span> 加入收藏</div>
+                        <button class="btn-primary" id="backToHomeBtn">回到首頁</button>
                     </div>
                 </div>`;
             const btn = document.getElementById('backToHomeBtn');
             if (btn) btn.addEventListener('click', () => { resetToHomepage(); });
         }
 
-        // ?�覽記�??�空?��??�面
+        // 瀏覽記錄為空時的畫面
         function renderEmptyHistory() {
             const container = document.getElementById('masonryContainer');
             container.classList.add('empty');
             container.innerHTML = `
                 <div style="display:flex;align-items:center;justify-content:center;width:100%;min-height:40vh;">
                     <div style="max-width:640px;width:90%;background:rgba(248,247,246,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(252,163,17,0.2);border-radius:24px;padding:32px;box-shadow:0 12px 40px rgba(252,163,17,0.15), inset 0 1px 0 rgba(255,255,255,0.9);text-align:center;">
-                        <div style="font-size:20px;color:#333;font-weight:700;margin-bottom:8px;">?��?沒�??�覽記�?</div>
-                        <div style="font-size:14px;color:#666;margin-bottom:18px;">點�??��??�卡?�查?�詳?��??�自?��???/div>
-                        <button class="btn-primary" id="backToHomeFromHistory">?�到首�?</button>
+                        <div style="font-size:20px;color:#333;font-weight:700;margin-bottom:8px;">目前沒有瀏覽記錄</div>
+                        <div style="font-size:14px;color:#666;margin-bottom:18px;">點擊優惠券卡片查看詳情後會自動記錄</div>
+                        <button class="btn-primary" id="backToHomeFromHistory">回到首頁</button>
                     </div>
                 </div>`;
             const btn = document.getElementById('backToHomeFromHistory');
             if (btn) btn.addEventListener('click', () => { resetToHomepage(); });
         }
 
-        // 添�??�覽記�?清除?��?
+        // 添加瀏覽記錄清除按鈕
         function addHistoryClearButton() {
-            // 移除已�??��??��?
+            // 移除已存在的按鈕
             const existingButton = document.getElementById('historyClearButton');
             if (existingButton) {
                 existingButton.remove();
             }
 
-            // ?�建清除?��?
+            // 創建清除按鈕
             const clearButton = document.createElement('div');
             clearButton.id = 'historyClearButton';
             clearButton.style.cssText = `
@@ -328,11 +336,11 @@
             `;
 
             clearButton.innerHTML = `
-                <span>??�?/span>
-                <span>清除?�?��???/span>
+                <span>🗑️</span>
+                <span>清除所有記錄</span>
             `;
 
-            // 添�?hover?��?
+            // 添加hover效果
             clearButton.addEventListener('mouseenter', () => {
                 clearButton.style.background = 'rgba(220, 38, 38, 1)';
                 clearButton.style.transform = 'translateY(-2px)';
@@ -345,9 +353,9 @@
                 clearButton.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
             });
 
-            // 添�?點�?事件
+            // 添加點擊事件
             clearButton.addEventListener('click', () => {
-                if (confirm('確�?要�??��??�瀏覽記�??��?此�?作無法復?��?)) {
+                if (confirm('確定要清除所有瀏覽記錄嗎？此操作無法復原。')) {
                     clearAllHistory();
                 }
             });
@@ -355,20 +363,21 @@
             document.body.appendChild(clearButton);
         }
 
-        // 清除?�?�瀏覽記�?
+        // 清除所有瀏覽記錄
         function clearAllHistory() {
             historyData = [];
             localStorage.removeItem('viewHistory');
             updateSidebarCounts();
 
-            // 移除清除?��?
+            // 移除清除按鈕
             removeHistoryClearButton();
 
-            // 顯示空�???            renderEmptyHistory();
-            showSuccessMessage('?�?�瀏覽記�?已�???);
+            // 顯示空狀態
+            renderEmptyHistory();
+            showSuccessMessage('所有瀏覽記錄已清除');
         }
 
-        // 移除?�覽記�?清除?��?
+        // 移除瀏覽記錄清除按鈕
         function removeHistoryClearButton() {
             const clearButton = document.getElementById('historyClearButton');
             if (clearButton) {
@@ -376,13 +385,14 @@
             }
         }
 
-        // ?��?彈�?
+        // 開啟彈窗
         async function openModal(coupon) {
             try {
-                // 添�??�瀏覽記�?
+                // 添加到瀏覽記錄
                 addToHistory(coupon);
 
-                // ?�顯示基?��?�?                const webp = coupon.image.replace(/\.jpg$/i, '.webp');
+                // 先顯示基本資訊
+                const webp = coupon.image.replace(/\.jpg$/i, '.webp');
                 document.getElementById('modalSourceWebp').srcset = webp;
                 const modalImg = document.getElementById('modalImage');
                 modalImg.src = coupon.image;
@@ -396,13 +406,13 @@
                 document.getElementById('storeAddress').textContent = coupon.address;
                 document.getElementById('storePhone').textContent = coupon.phone;
 
-                // 從API?��??�詳細�?資�?
+                // 從API獲取更詳細的資訊
                 const res = await fetch(`api/coupons/${coupon.id}`);
                 if (res.ok) {
                     const data = await res.json();
                     const detailedCoupon = data.data || data;
 
-                    // ?�新詳細資�?
+                    // 更新詳細資訊
                     if (detailedCoupon.terms) {
                         document.getElementById('offerDescription').textContent = detailedCoupon.terms;
                     }
@@ -411,43 +421,44 @@
                         document.getElementById('offerUsage').textContent = discountText;
                     }
 
-                    // ?�新?�覽?��?如�??��?話�?
+                    // 更新瀏覽數（如果有的話）
                     if (detailedCoupon.view_count !== undefined) {
                         incrementViewCount(coupon.id);
                     }
                 }
             } catch (e) {
-                console.warn('?��?載入詳細?��??��?�?', e);
+                console.warn('無法載入詳細優惠券資訊:', e);
             }
 
-            // ?�步彈�??��??��??��?
+            // 同步彈窗收藏按鈕文字
             syncModalFavoriteButton();
 
             document.getElementById('modalOverlay').classList.add('active');
             document.body.style.overflow = 'hidden';
 
-            // 綁�??�箱?��?
+            // 綁定燈箱開啟
             modalImg.onclick = () => openLightbox(modalImg.currentSrc || modalImg.src);
-            // 記�??�覽歷史
+            // 記錄瀏覽歷史
             addHistory(coupon.id);
         }
 
-        // 輔助?�數：格式�??�扣?��?
+        // 輔助函數：格式化折扣文字
         function getDiscountText(type, value) {
             switch (type) {
-                case 'percentage': return `${value}% ?�扣`;
-                case 'fixed': return `?�扣 NT$${value}`;
-                case 'bogo': return '買�??��?';
-                case 'free': return '?�費體�?';
-                default: return '每人?�用一�?;
+                case 'percentage': return `${value}% 折扣`;
+                case 'fixed': return `折扣 NT$${value}`;
+                case 'bogo': return '買一送一';
+                case 'free': return '免費體驗';
+                default: return '每人限用一次';
             }
         }
 
-        // 增�??�覽?��??��??�新�?        async function incrementViewCount(couponId) {
+        // 增加瀏覽數（靜默更新）
+        async function incrementViewCount(couponId) {
             try {
                 await fetch(`api/coupons/${couponId}/view`, { method: 'POST' });
             } catch (e) {
-                // ?��?失�?
+                // 靜默失敗
             }
         }
 
@@ -456,7 +467,7 @@
             const isFav = currentCoupon ? favs.has(currentCoupon.id) : false;
             const btn = document.querySelector('#modalOverlay .btn-secondary');
             if (btn) {
-                btn.textContent = isFav ? '?��??��?' : '?��??��?';
+                btn.textContent = isFav ? '取消收藏' : '收藏優惠';
             }
         }
 
@@ -467,36 +478,40 @@
             }
         }
 
-        // ?��??�使?��???        async function useCoupon(coupon) {
+        // 優惠券使用功能
+        async function useCoupon(coupon) {
             if (!coupon) return;
 
             if (!isLoggedIn()) {
-                showSuccessMessage('請�??�入?�能使用?��???);
+                showSuccessMessage('請先登入才能使用優惠券');
                 closeModal();
-                // ?�以?��??�入視�?
+                // 可以開啟登入視窗
                 return;
             }
 
-            // 檢查?�否已�?使用??            const usedCoupons = getUsedCoupons();
+            // 檢查是否已經使用過
+            const usedCoupons = getUsedCoupons();
             if (usedCoupons.includes(coupon.id)) {
-                showSuccessMessage('?�已經使?��??�張?��??��?');
+                showSuccessMessage('您已經使用過這張優惠券了');
                 return;
             }
 
-            // 確�?使用?��???            const confirmModal = document.createElement('div');
+            // 確認使用優惠券
+            const confirmModal = document.createElement('div');
             confirmModal.className = 'modal-overlay';
             confirmModal.style.cssText = 'display: flex; z-index: 10001;';
 
             confirmModal.innerHTML = `
                 <div class="modal-content" style="max-width: 400px;">
                     <div style="padding: 28px; text-align: center;">
-                        <h3 style="margin-bottom: 16px; color: #374151;">?�� 使用?��???/h3>
+                        <h3 style="margin-bottom: 16px; color: #374151;">🎫 使用優惠券</h3>
                         <p style="margin-bottom: 20px; color: #6b7280;">
-                            確�?要使?��?{coupon.title}?��?�?br>
-                            使用後�??��??�次使用此優?�券??                        </p>
+                            確定要使用「${coupon.title}」嗎？<br>
+                            使用後將無法再次使用此優惠券。
+                        </p>
                         <div style="display: flex; gap: 12px;">
-                            <button onclick="cancelUseCoupon()" class="btn-secondary" style="flex: 1;">?��?</button>
-                            <button onclick="confirmUseCoupon(${coupon.id})" class="btn-primary" style="flex: 1;">確�?使用</button>
+                            <button onclick="cancelUseCoupon()" class="btn-secondary" style="flex: 1;">取消</button>
+                            <button onclick="confirmUseCoupon(${coupon.id})" class="btn-primary" style="flex: 1;">確認使用</button>
                         </div>
                     </div>
                 </div>
@@ -505,7 +520,7 @@
             document.body.appendChild(confirmModal);
             document.body.style.overflow = 'hidden';
 
-            // 添�?點�??�景?��??�能
+            // 添加點擊背景關閉功能
             addClickOutsideToClose(confirmModal, cancelUseCoupon);
         }
 
@@ -519,7 +534,7 @@
 
         async function confirmUseCoupon(couponId) {
             try {
-                // 調用API記�?使用
+                // 調用API記錄使用
                 const response = await fetch(`api/coupons/${couponId}/use`, {
                     method: 'POST',
                     headers: {
@@ -531,23 +546,26 @@
                 if (response.ok) {
                     const result = await response.json();
 
-                    // 記�??�本?��???                    const usedCoupons = getUsedCoupons();
+                    // 記錄到本地存儲
+                    const usedCoupons = getUsedCoupons();
                     usedCoupons.push(couponId);
                     setUsedCoupons(usedCoupons);
 
-                    // ?��??�?��?�?                    cancelUseCoupon();
+                    // 關閉所有彈窗
+                    cancelUseCoupon();
                     closeModal();
 
-                    // 顯示?��?訊息
-                    showSuccessMessage('?? ?��??�使?��??��?請�?店家?�示此�?�?);
+                    // 顯示成功訊息
+                    showSuccessMessage('🎉 優惠券使用成功！請向店家出示此憑證');
 
-                    // ?��?使用?��?（�??�QR Code�?                    generateUsageProof(currentCoupon, result);
+                    // 生成使用憑證（包含QR Code）
+                    generateUsageProof(currentCoupon, result);
                 } else {
-                    throw new Error('使用?��??�失??);
+                    throw new Error('使用優惠券失敗');
                 }
             } catch (e) {
-                console.error('使用?��??�失??', e);
-                showSuccessMessage('使用失�?�? + e.message);
+                console.error('使用優惠券失敗:', e);
+                showSuccessMessage('使用失敗：' + e.message);
             }
         }
 
@@ -562,43 +580,44 @@
 
             proofModal.innerHTML = `
                 <div class="modal-content" style="max-width: 450px; background: linear-gradient(135deg, #FCA311, #F79009); color: white; border: none;">
-                    <button onclick="closeUsageProof()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">?</button>
+                    <button onclick="closeUsageProof()" style="position: absolute; top: 10px; right: 15px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">×</button>
                     <div style="padding: 40px 28px; text-align: center;">
-                        <div style="font-size: 48px; margin-bottom: 16px;">?��</div>
-                        <h3 style="margin-bottom: 12px;">?��??�使?��?�?/h3>
+                        <div style="font-size: 48px; margin-bottom: 16px;">🎫</div>
+                        <h3 style="margin-bottom: 12px;">優惠券使用憑證</h3>
                         
                         <div style="background: rgba(255,255,255,0.2); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
                             <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">${coupon.title}</div>
-                            <div style="font-size: 14px; opacity: 0.9;">${coupon.storeName || coupon.vendor_name || '店家?�稱'}</div>
+                            <div style="font-size: 14px; opacity: 0.9;">${coupon.storeName || coupon.vendor_name || '店家名稱'}</div>
                         </div>
                         
                         ${qrCodeUrl ? `
                         <div style="background: white; padding: 16px; border-radius: 12px; margin-bottom: 16px;">
                             <img src="${qrCodeUrl}" alt="QR Code" style="width: 200px; height: 200px; display: block; margin: 0 auto;">
-                            <div style="font-size: 12px; color: #666; margin-top: 8px;">請�?店家?�示此QR Code</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 8px;">請向店家出示此QR Code</div>
                         </div>
                         ` : ''}
                         
                         <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
-                            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 4px;">驗�?�?/div>
+                            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 4px;">驗證碼</div>
                             <div style="font-size: 18px; font-weight: 700; letter-spacing: 1px;">${verificationCode}</div>
                         </div>
                         
                         ${expiresAt ? `
                         <div style="font-size: 12px; opacity: 0.8; margin-bottom: 16px;">
-                            ?��??��??�至�?{new Date(expiresAt).toLocaleString('zh-TW')}
+                            憑證有效期至：${new Date(expiresAt).toLocaleString('zh-TW')}
                         </div>
                         ` : ''}
                         <div style="font-size: 12px; opacity: 0.8;">
-                            使用?��?�?{now.toLocaleString('zh-TW')}<br>
-                            請�?店家?�示此�?�?                        </div>
+                            使用時間：${now.toLocaleString('zh-TW')}<br>
+                            請向店家出示此憑證
+                        </div>
                     </div>
                 </div>
             `;
 
             document.body.appendChild(proofModal);
 
-            // 添�?點�??�景?��??�能
+            // 添加點擊背景關閉功能
             addClickOutsideToClose(proofModal, closeUsageProof);
         }
 
@@ -610,7 +629,7 @@
             }
         }
 
-        // 使用記�?管�?
+        // 使用記錄管理
         function getUsedCoupons() {
             try {
                 return JSON.parse(localStorage.getItem('usedCoupons') || '[]');
@@ -623,13 +642,13 @@
             localStorage.setItem('usedCoupons', JSON.stringify(list));
         }
 
-        // ?��?彈�?
+        // 關閉彈窗
         function closeModal() {
             document.getElementById('modalOverlay').classList.remove('active');
             document.body.style.overflow = 'auto';
         }
 
-        // ?�箱?�能
+        // 燈箱功能
         function openLightbox(src) {
             const overlay = document.getElementById('lightboxOverlay');
             const img = document.getElementById('lightboxImage');
@@ -641,7 +660,8 @@
             overlay.style.display = 'none';
         }
 
-        // ?��??�歷?��??�地�?        function getFavorites() { try { return JSON.parse(localStorage.getItem(LS_FAVORITES) || '[]'); } catch { return []; } }
+        // 收藏與歷史（本地）
+        function getFavorites() { try { return JSON.parse(localStorage.getItem(LS_FAVORITES) || '[]'); } catch { return []; } }
         function setFavorites(list) { localStorage.setItem(LS_FAVORITES, JSON.stringify(list)); }
         function isFav(id) { return getFavorites().includes(id); }
         async function toggleFavorite(coupon) {
@@ -658,23 +678,26 @@
                         favIds.add(coupon.id);
                     }
                     setFavorites(Array.from(favIds));
-                    // ?�新?��?欄�???                    updateSidebarCounts();
-                    // 不�?跳出 alert，使?��?默更?��??��??��?
+                    // 更新側邊欄計數
+                    updateSidebarCounts();
+                    // 不再跳出 alert，使用靜默更新與愛心切換
                 } catch (e) {
-                    console.warn('?�步?��?失�?');
+                    console.warn('同步收藏失敗');
                 }
             } else {
                 const favs = getFavorites();
                 const idx = favs.indexOf(coupon.id);
                 if (idx >= 0) { favs.splice(idx, 1); } else { favs.unshift(coupon.id); }
                 setFavorites(favs.slice(0, 200));
-                // ?�新?��?欄�???                updateSidebarCounts();
-                // 不�?跳出 alert
+                // 更新側邊欄計數
+                updateSidebarCounts();
+                // 不再跳出 alert
             }
-            // ?�步?�?��?心、收?�數?�收?��???            const nowActive = isFav(coupon.id);
+            // 同步所有愛心、收藏數與收藏視圖
+            const nowActive = isFav(coupon.id);
             document.querySelectorAll(`[data-action="quick-fav"][data-id="${coupon.id}"]`).forEach(btn => {
                 btn.classList.toggle('active', nowActive);
-                btn.textContent = nowActive ? '?? : '??;
+                btn.textContent = nowActive ? '❤' : '♡';
             });
             updateFavCount();
             syncModalFavoriteButton();
@@ -689,9 +712,10 @@
         function setHistory(list) { localStorage.setItem(LS_HISTORY, JSON.stringify(list)); }
         function addHistory(id) { const h = getHistory().filter(x => x !== id); h.unshift(id); setHistory(h.slice(0, 200)); }
 
-        // 添�?標籤
+        // 添加標籤
         function addTag(tagText, tagType = 'search') {
-            // 檢查?�否已�???            if (selectedTags.some(tag => tag.text === tagText)) {
+            // 檢查是否已存在
+            if (selectedTags.some(tag => tag.text === tagText)) {
                 return;
             }
 
@@ -706,10 +730,12 @@
             renderSelectedTags();
             performSearch();
 
-            // ?�新下�??�單中�??�中?�??            updateDropdownSelection();
+            // 更新下拉選單中的選中狀態
+            updateDropdownSelection();
         }
 
-        // 渲�??�中?��?�?        function renderSelectedTags() {
+        // 渲染選中的標籤
+        function renderSelectedTags() {
             const container = document.getElementById('selectedTags');
             container.innerHTML = '';
 
@@ -718,40 +744,43 @@
                 tagElement.className = 'selected-tag';
                 tagElement.innerHTML = `
                      <span>${tag.text}</span>
-                     <button class="selected-tag-remove" onclick="removeTag('${tag.text}')">?</button>
+                     <button class="selected-tag-remove" onclick="removeTag('${tag.text}')">×</button>
                  `;
                 container.appendChild(tagElement);
             });
 
-            // ?�新?��?�?placeholder
+            // 更新搜尋框 placeholder
             const searchInput = document.getElementById('searchInput');
             if (selectedTags.length > 0) {
-                searchInput.placeholder = '繼�??��?...';
+                searchInput.placeholder = '繼續搜尋...';
             } else {
-                searchInput.placeholder = '?��??��??�、�?家�??��?...';
+                searchInput.placeholder = '搜尋優惠券、店家或分類...';
             }
         }
 
-        // ?�新下�??�單中�??�中?�??        function updateDropdownSelection() {
-            // ?�新?��?標籤?�中?�??            document.querySelectorAll('.category-chip').forEach(chip => {
+        // 更新下拉選單中的選中狀態
+        function updateDropdownSelection() {
+            // 更新分類標籤選中狀態
+            document.querySelectorAll('.category-chip').forEach(chip => {
                 const category = chip.getAttribute('data-category');
                 const isSelected = selectedTags.some(tag => tag.text.includes(category));
                 chip.classList.toggle('selected', isSelected);
             });
 
-            // ?�新?��?標籤?�中?�??            document.querySelectorAll('.trending-tag').forEach(tag => {
+            // 更新熱門標籤選中狀態
+            document.querySelectorAll('.trending-tag').forEach(tag => {
                 const tagText = tag.getAttribute('data-tag');
                 const isSelected = selectedTags.some(tag => tag.text === tagText);
                 tag.classList.toggle('selected', isSelected);
             });
         }
 
-        // ?��??��? (結�?標籤?�輸?��?)
+        // 執行搜尋 (結合標籤和輸入框)
         async function performSearch() {
             const searchInput = document.getElementById('searchInput');
             const searchTerm = searchInput.value.toLowerCase().trim();
 
-            // 如�??��?尋�?，�?試�?API?��?
+            // 如果有搜尋詞，嘗試從API搜尋
             if (searchTerm !== '') {
                 try {
                     const res = await fetch(`api/coupons?search=${encodeURIComponent(searchTerm)}&page=1&pageSize=50`);
@@ -759,17 +788,17 @@
                     const items = json?.data?.coupons || [];
 
                     if (Array.isArray(items) && items.length > 0) {
-                        // 轉�?API資�??��?
+                        // 轉換API資料格式
                         const searchResults = items.map((item, idx) => ({
                             id: item.id || idx + 1,
-                            image: item.image && item.image.trim() !== '' ? item.image : `img/?�好康�?�????(${(idx % 50) + 1}).jpg`,
-                            storeName: item.storeName || '?��?店家',
-                            category: item.category || '一?�優??,
-                            title: item.title || '?��?活�?',
-                            discount: item.discount_value ? `${item.discount_value}${item.discount_type === 'percentage' ? '%' : '??} OFF` : '?�價?��?',
+                            image: item.image && item.image.trim() !== '' ? item.image : `img/送好康文宣素材 (${(idx % 50) + 1}).jpg`,
+                            storeName: item.storeName || '合作店家',
+                            category: item.category || '一般優惠',
+                            title: item.title || '優惠活動',
+                            discount: item.discount_value ? `${item.discount_value}${item.discount_type === 'percentage' ? '%' : '元'} OFF` : '特價優惠',
                             expiry: item.end_date ? new Date(item.end_date).toLocaleDateString('zh-TW') : '',
-                            usage: item.usage_rules || '每人?�用一�?,
-                            description: item.description || '詳�?請�?活�?說�???,
+                            usage: item.usage_rules || '每人限用一次',
+                            description: item.description || '詳情請見活動說明。',
                             address: item.address || '',
                             phone: item.phone || ''
                         }));
@@ -778,13 +807,15 @@
                         return;
                     }
                 } catch (e) {
-                    console.warn('API?��?失�?，使?�本?��?�?', e);
+                    console.warn('API搜尋失敗，使用本地搜尋:', e);
                 }
             }
 
-            // ?�退?�本?��?�?            let filteredCoupons = coupons;
+            // 回退到本地搜尋
+            let filteredCoupons = coupons;
 
-            // ?��??�中?��?籤篩??            if (selectedTags.length > 0) {
+            // 根據選中的標籤篩選
+            if (selectedTags.length > 0) {
                 filteredCoupons = coupons.filter(coupon => {
                     return selectedTags.some(tag => {
                         if (tag.type === 'category') {
@@ -798,7 +829,8 @@
                 });
             }
 
-            // ?�根?��?尋�??�容?��?步篩??            if (searchTerm !== '') {
+            // 再根據搜尋框內容進一步篩選
+            if (searchTerm !== '') {
                 filteredCoupons = filteredCoupons.filter(coupon =>
                     coupon.storeName.toLowerCase().includes(searchTerm) ||
                     coupon.title.toLowerCase().includes(searchTerm) ||
@@ -809,12 +841,12 @@
             renderCoupons(filteredCoupons);
         }
 
-        // ?��??�能 (保�??��??�能，�??�為調用 performSearch)
+        // 搜尋功能 (保留原有功能，但改為調用 performSearch)
         function handleSearch() {
             performSearch();
         }
 
-        // ?��?篩選
+        // 分類篩選
         function filterByCategory(category) {
             const filteredCoupons = coupons.filter(coupon =>
                 coupon.category.includes(category)
@@ -822,42 +854,50 @@
             renderCoupons(filteredCoupons);
             document.getElementById('searchDropdown').classList.remove('active');
 
-            // ?�新?��?欄選中�???            updateSidebarSelection(category);
+            // 更新側邊欄選中狀態
+            updateSidebarSelection(category);
         }
 
-        // ?�置?��???        function resetToHomepage() {
+        // 重置回首頁
+        function resetToHomepage() {
             setView('home');
-            // 清空?��?�?            document.getElementById('searchInput').value = '';
+            // 清空搜尋框
+            document.getElementById('searchInput').value = '';
 
-            // 清空?�?�選中�?標籤
+            // 清空所有選中的標籤
             selectedTags = [];
             renderSelectedTags();
 
-            // ?��??��?下�??�單
+            // 關閉搜尋下拉選單
             document.getElementById('searchDropdown').classList.remove('active');
 
-            // ?�新下�??�單?�中?�??            updateDropdownSelection();
+            // 更新下拉選單選中狀態
+            updateDropdownSelection();
 
-            // ?�新渲�??�?�優?�券
+            // 重新渲染所有優惠券
             renderCoupons(coupons);
 
-            // ?�置?��?欄選中�??�為首�?
-            updateSidebarSelection('首�?');
+            // 重置側邊欄選中狀態為首頁
+            updateSidebarSelection('首頁');
 
-            // 滾�??��???            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // 滾動到頂部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // ?�新?��?欄選中�???        function updateSidebarSelection(activeItem) {
-            // 移除?�?�active?�??            document.querySelectorAll('.sidebar-item').forEach(item => {
+        // 更新側邊欄選中狀態
+        function updateSidebarSelection(activeItem) {
+            // 移除所有active狀態
+            document.querySelectorAll('.sidebar-item').forEach(item => {
                 item.classList.remove('active');
             });
 
-            // ?��?activeItem設�??��?active?�??            let targetItem = null;
+            // 根據activeItem設定新的active狀態
+            let targetItem = null;
 
             document.querySelectorAll('.sidebar-item').forEach(item => {
                 const text = item.querySelector('.sidebar-text')?.textContent;
 
-                if (activeItem === '首�?' && text === '首�?') {
+                if (activeItem === '首頁' && text === '首頁') {
                     targetItem = item;
                 }
             });
@@ -867,13 +907,14 @@
             }
         }
 
-        // ?��?欄�????�起?�能
+        // 側邊欄展開/收起功能
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('expanded');
         }
 
-        // ?��?展�?/?�起?��?�?        function setupSidebarToggle() {
+        // 自動展開/收起側邊欄
+        function setupSidebarToggle() {
             const sidebar = document.querySelector('.sidebar');
             const header = document.querySelector('.header');
             const mainContent = document.querySelector('.main-content');
@@ -891,35 +932,41 @@
                 mainContent.classList.remove('pushed');
             }
 
-            // 滑�??�入?��???            sidebar.addEventListener('mouseenter', () => {
+            // 滑鼠進入時展開
+            sidebar.addEventListener('mouseenter', () => {
                 clearTimeout(hoverTimer);
                 expandSidebar();
             });
 
-            // 滑�??��??�收起�?延遲300ms�?            sidebar.addEventListener('mouseleave', () => {
+            // 滑鼠離開時收起（延遲300ms）
+            sidebar.addEventListener('mouseleave', () => {
                 hoverTimer = setTimeout(() => {
                     collapseSidebar();
                 }, 300);
             });
 
-            // 點�??�目?��??��??��??��?段�???            sidebar.addEventListener('click', () => {
+            // 點擊項目時保持展開狀態一段時間
+            sidebar.addEventListener('click', () => {
                 clearTimeout(hoverTimer);
                 expandSidebar();
 
-                // 3秒�??��??�起
+                // 3秒後自動收起
                 hoverTimer = setTimeout(() => {
                     collapseSidebar();
                 }, 3000);
             });
         }
 
-        // ?��?欄�??�實??        let currentSidebarView = 'home';
+        // 側邊欄功能實現
+        let currentSidebarView = 'home';
         let historyData = JSON.parse(localStorage.getItem('viewHistory') || '[]');
 
-        // ?�新?��?欄�???        function updateSidebarCounts() {
-            // ?�新�?localStorage 載入?�覽記�?，確保數?��?�?            historyData = JSON.parse(localStorage.getItem('viewHistory') || '[]');
+        // 更新側邊欄計數
+        function updateSidebarCounts() {
+            // 重新從 localStorage 載入瀏覽記錄，確保數據同步
+            historyData = JSON.parse(localStorage.getItem('viewHistory') || '[]');
 
-            // 清�??��??�瀏覽記�?
+            // 清理無效的瀏覽記錄
             if (coupons && coupons.length > 0) {
                 const validHistoryData = historyData.filter(item =>
                     coupons.some(coupon => coupon.id === item.id)
@@ -931,7 +978,7 @@
                 }
             }
 
-            // ?��??��?
+            // 收藏數量
             const favCount = getFavorites().length;
             const favCountEl = document.getElementById('favCount');
             if (favCount > 0) {
@@ -941,9 +988,10 @@
                 favCountEl.style.display = 'none';
             }
 
-            // ?�覽記�??��?
+            // 瀏覽記錄數量
             const historyCountEl = document.getElementById('historyCount');
-            console.log('?�覽記�??��?:', historyData); // 調試??
+            console.log('瀏覽記錄數據:', historyData); // 調試用
+
             if (historyData.length > 0) {
                 historyCountEl.textContent = historyData.length > 99 ? '99+' : historyData.length;
                 historyCountEl.style.display = 'inline-block';
@@ -951,12 +999,14 @@
                 historyCountEl.style.display = 'none';
             }
 
-            // ?��??�新?�員?�單?�徽�?            if (isLoggedIn()) {
+            // 同時更新會員選單的徽章
+            if (isLoggedIn()) {
                 updateSimpleMemberMenuBadges();
             }
         }
 
-        // 設�??��?欄活?��???        function setSidebarActive(action) {
+        // 設定側邊欄活動狀態
+        function setSidebarActive(action) {
             document.querySelectorAll('.sidebar-item').forEach(item => {
                 item.classList.remove('active');
             });
@@ -967,7 +1017,8 @@
             currentSidebarView = action;
         }
 
-        // ?��?欄�??��???        function handleSidebarAction(action) {
+        // 側邊欄功能處理
+        function handleSidebarAction(action) {
             setSidebarActive(action);
 
             switch (action) {
@@ -998,87 +1049,93 @@
             }
         }
 
-        // 顯示?�?�優?�券（�??��?
+        // 顯示所有優惠券（首頁）
         function showAllCoupons() {
             setView('home');
-            removeHistoryClearButton(); // 移除清除?��?
+            removeHistoryClearButton(); // 移除清除按鈕
             renderCoupons(coupons);
-            showSuccessMessage('?�到首�?');
+            showSuccessMessage('回到首頁');
         }
 
-        // 顯示?��??�表
+        // 顯示收藏列表
         async function showFavorites() {
-            removeHistoryClearButton(); // 移除清除?��?
-            await viewFavorites(); // 使用?��??�收?��???        }
+            removeHistoryClearButton(); // 移除清除按鈕
+            await viewFavorites(); // 使用現有的收藏功能
+        }
 
-        // 顯示?�覽記�?
+        // 顯示瀏覽記錄
         function showHistory() {
             const historyIds = historyData.map(item => item.id);
             const historyCoupons = coupons.filter(coupon => historyIds.includes(coupon.id));
 
-            // 清�??��??�瀏覽記�?（優?�券已�?存在�?            const validHistoryData = historyData.filter(item =>
+            // 清理無效的瀏覽記錄（優惠券已不存在）
+            const validHistoryData = historyData.filter(item =>
                 coupons.some(coupon => coupon.id === item.id)
             );
 
-            // 如�??�無?��??�被清�?，更??localStorage
+            // 如果有無效記錄被清理，更新 localStorage
             if (validHistoryData.length !== historyData.length) {
                 historyData = validHistoryData;
                 localStorage.setItem('viewHistory', JSON.stringify(historyData));
-                updateSidebarCounts(); // ?�新計數
+                updateSidebarCounts(); // 更新計數
             }
 
-            // 如�?沒�??�覽記�?，顯示空?�??            if (historyData.length === 0) {
+            // 如果沒有瀏覽記錄，顯示空狀態
+            if (historyData.length === 0) {
                 renderEmptyHistory();
-                showSuccessMessage('?��?沒�??�覽記�?');
+                showSuccessMessage('目前沒有瀏覽記錄');
                 return;
             }
 
-            // ?�瀏覽?��??��?（�??��??��?�?            const sortedHistory = historyCoupons.sort((a, b) => {
+            // 按瀏覽時間排序（最新的在前）
+            const sortedHistory = historyCoupons.sort((a, b) => {
                 const aTime = historyData.find(h => h.id === a.id)?.timestamp || 0;
                 const bTime = historyData.find(h => h.id === b.id)?.timestamp || 0;
                 return bTime - aTime;
             });
 
-            // ?��??��??�添?��??��???            addHistoryClearButton();
+            // 在頁面頂部添加清除按鈕
+            addHistoryClearButton();
             renderCoupons(sortedHistory);
-            showSuccessMessage(`顯示 ${sortedHistory.length} ?�瀏覽記�?`);
+            showSuccessMessage(`顯示 ${sortedHistory.length} 個瀏覽記錄`);
         }
 
-        // 顯示?��??��?
+        // 顯示熱門優惠
         function showHotCoupons() {
-            removeHistoryClearButton(); // 移除清除?��?
-            // ?�瀏覽次數?��?
+            removeHistoryClearButton(); // 移除清除按鈕
+            // 按瀏覽次數排序
             const hotCoupons = [...coupons].sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
             renderCoupons(hotCoupons);
 
-            // ?�新計數
+            // 更新計數
             const hotCountEl = document.getElementById('hotCount');
             hotCountEl.textContent = hotCoupons.length;
             hotCountEl.style.display = 'inline-block';
 
-            showSuccessMessage('顯示?��??��?');
+            showSuccessMessage('顯示熱門優惠');
         }
 
-        // 顯示?��??��?（模?�地?��?置�?
+        // 顯示附近優惠（模擬地理位置）
         function showNearbyCoupons() {
-            removeHistoryClearButton(); // 移除清除?��?
-            // 模擬?��??��?（隨機選?��?些優?�券�?            const nearbyCount = Math.min(10, coupons.length);
+            removeHistoryClearButton(); // 移除清除按鈕
+            // 模擬附近優惠（隨機選擇一些優惠券）
+            const nearbyCount = Math.min(10, coupons.length);
             const shuffled = [...coupons].sort(() => 0.5 - Math.random());
             const nearbyCoupons = shuffled.slice(0, nearbyCount);
 
             renderCoupons(nearbyCoupons);
 
-            // ?�新計數
+            // 更新計數
             const nearbyCountEl = document.getElementById('nearbyCount');
             nearbyCountEl.textContent = nearbyCount;
             nearbyCountEl.style.display = 'inline-block';
 
-            showSuccessMessage(`?�到 ${nearbyCount} ?��?近優?�`);
+            showSuccessMessage(`找到 ${nearbyCount} 個附近優惠`);
         }
 
-        // 顯示?��?活�?
+        // 顯示限時活動
         function showLimitedCoupons() {
-            removeHistoryClearButton(); // 移除清除?��?
+            removeHistoryClearButton(); // 移除清除按鈕
             const now = new Date();
             const oneWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
@@ -1090,15 +1147,15 @@
 
             renderCoupons(limitedCoupons);
 
-            // ?�新計數
+            // 更新計數
             const limitedCountEl = document.getElementById('limitedCount');
             limitedCountEl.textContent = limitedCoupons.length;
             limitedCountEl.style.display = 'inline-block';
 
-            showSuccessMessage(`?�到 ${limitedCoupons.length} ?��??�活?�`);
+            showSuccessMessage(`找到 ${limitedCoupons.length} 個限時活動`);
         }
 
-        // 顯示設�??�板
+        // 顯示設定面板
         function showSettings() {
             const settingsModal = document.createElement('div');
             settingsModal.className = 'modal-overlay';
@@ -1106,49 +1163,51 @@
 
             settingsModal.innerHTML = `
                 <div class="modal-content profile-modal-content">
-                    <button class="modal-close" onclick="closeSettings()">?</button>
+                    <button class="modal-close" onclick="closeSettings()">×</button>
                     <div class="profile-modal-body">
                         <div class="profile-header">
-                            <div class="profile-avatar">?��?</div>
-                            <h2 class="profile-title">系統設�?</h2>
+                            <div class="profile-avatar">⚙️</div>
+                            <h2 class="profile-title">系統設定</h2>
                         </div>
                         
-                        <!-- 顯示設�? -->
+                        <!-- 顯示設定 -->
                         <div class="profile-section">
-                            <h3 class="section-title">顯示設�?</h3>
+                            <h3 class="section-title">顯示設定</h3>
                             <div class="form-grid">
                                 <div class="form-group">
                                     <label class="form-label">
                                         <input type="checkbox" id="showCounts" style="margin-right: 8px;">
-                                        顯示?��?欄�???                                    </label>
+                                        顯示側邊欄計數
+                                    </label>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">
                                         <input type="checkbox" id="autoExpand" style="margin-right: 8px;">
-                                        ?��?展�??��?�?                                    </label>
+                                        自動展開側邊欄
+                                    </label>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- ?��?設�? -->
+                        <!-- 數據設定 -->
                         <div class="profile-section">
-                            <h3 class="section-title">?��?管�?</h3>
+                            <h3 class="section-title">數據管理</h3>
                             <div class="form-grid">
                                 <button class="btn-secondary" onclick="clearHistory()" style="margin-bottom: 10px;">
-                                    清除?�覽記�?
+                                    清除瀏覽記錄
                                 </button>
                                 <button class="btn-secondary" onclick="clearSearchHistory()" style="margin-bottom: 10px;">
-                                    清除?��?記�?
+                                    清除搜尋記錄
                                 </button>
                                 <button class="btn-secondary" onclick="exportData()">
-                                    ?�出?��?資�?
+                                    匯出我的資料
                                 </button>
                             </div>
                         </div>
                         
                         <div class="profile-actions">
-                            <button onclick="closeSettings()" class="btn-secondary">?��?</button>
-                            <button onclick="saveSettings()" class="btn-primary">?��?設�?</button>
+                            <button onclick="closeSettings()" class="btn-secondary">關閉</button>
+                            <button onclick="saveSettings()" class="btn-primary">儲存設定</button>
                         </div>
                     </div>
                 </div>
@@ -1157,10 +1216,10 @@
             document.body.appendChild(settingsModal);
             document.body.style.overflow = 'hidden';
 
-            // 添�?點�??�景?��??�能
+            // 添加點擊背景關閉功能
             addClickOutsideToClose(settingsModal, closeSettings);
 
-            // 載入?��?設�?
+            // 載入當前設定
             loadCurrentSettings();
         }
 
@@ -1186,38 +1245,39 @@
 
             localStorage.setItem('userSettings', JSON.stringify(settings));
             applySettings(settings);
-            showSuccessMessage('設�?已儲�?);
+            showSuccessMessage('設定已儲存');
             closeSettings();
         }
 
         function applySettings(settings) {
-            // ?�用顯示設�?
+            // 應用顯示設定
             const countElements = document.querySelectorAll('.sidebar-count');
             countElements.forEach(el => {
                 if (settings.showCounts === false) {
                     el.style.display = 'none';
                 } else {
-                    // ?�復?�本?�顯示�?�?                    const count = parseInt(el.textContent) || 0;
+                    // 恢復原本的顯示邏輯
+                    const count = parseInt(el.textContent) || 0;
                     el.style.display = count > 0 ? 'inline-block' : 'none';
                 }
             });
         }
 
         function clearHistory() {
-            if (confirm('確�?要�??��??�瀏覽記�??��?')) {
+            if (confirm('確定要清除所有瀏覽記錄嗎？')) {
                 historyData = [];
                 localStorage.removeItem('viewHistory');
                 updateSidebarCounts();
-                showSuccessMessage('?�覽記�?已�???);
+                showSuccessMessage('瀏覽記錄已清除');
             }
         }
 
         function clearSearchHistory() {
-            if (confirm('確�?要�??��??��?尋�??��?�?)) {
+            if (confirm('確定要清除所有搜尋記錄嗎？')) {
                 searchHistory = [];
                 localStorage.removeItem('searchHistory');
                 renderSearchHistory();
-                showSuccessMessage('?��?記�?已�???);
+                showSuccessMessage('搜尋記錄已清除');
             }
         }
 
@@ -1233,16 +1293,16 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = '?��?康_?��?資�?.json';
+            a.download = '送齁康_我的資料.json';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
-            showSuccessMessage('資�??�出完�?');
+            showSuccessMessage('資料匯出完成');
         }
 
-        // 顯示幫助中�?
+        // 顯示幫助中心
         function showHelp() {
             const helpModal = document.createElement('div');
             helpModal.className = 'modal-overlay';
@@ -1250,74 +1310,74 @@
 
             helpModal.innerHTML = `
                 <div class="modal-content profile-modal-content">
-                    <button class="modal-close" onclick="closeHelp()">?</button>
+                    <button class="modal-close" onclick="closeHelp()">×</button>
                     <div class="profile-modal-body">
                         <div class="profile-header">
-                            <div class="profile-avatar">??/div>
-                            <h2 class="profile-title">幫助中�?</h2>
+                            <div class="profile-avatar">❓</div>
+                            <h2 class="profile-title">幫助中心</h2>
                         </div>
                         
-                        <!-- 常�??��? -->
+                        <!-- 常見問題 -->
                         <div class="profile-section">
-                            <h3 class="section-title">常�??��?</h3>
+                            <h3 class="section-title">常見問題</h3>
                             <div class="help-item">
-                                <h4>如�?使用?��??��?</h4>
-                                <p>1. 點�??��??�卡?�查?�詳??br>
-                                2. 點�??��??�使?�」�???br>
-                                3. 確�?使用後�??��?使用證�?<br>
-                                4. ?��?家出示�??�即?�享?�優??/p>
+                                <h4>如何使用優惠券？</h4>
+                                <p>1. 點擊優惠券卡片查看詳情<br>
+                                2. 點擊「立即使用」按鈕<br>
+                                3. 確認使用後會生成使用證明<br>
+                                4. 向店家出示證明即可享受優惠</p>
                             </div>
                             <div class="help-item">
-                                <h4>如�??��??��??��?</h4>
-                                <p>點�??��??�卡?�右上�??��?心�?標�??�在詳�??�面點�??�收?�優?�」�??��?/p>
+                                <h4>如何收藏優惠券？</h4>
+                                <p>點擊優惠券卡片右上角的愛心圖標，或在詳情頁面點擊「收藏優惠」按鈕。</p>
                             </div>
                             <div class="help-item">
-                                <h4>如�??��??��??��?�?/h4>
-                                <p>點�?左側?��??�「�??�收?�」�??��??�右上�??�員?�單中�??��??�收?�」�?/p>
-                            </div>
-                        </div>
-                        
-                        <!-- ?�能說�? -->
-                        <div class="profile-section">
-                            <h3 class="section-title">?�能說�?</h3>
-                            <div class="help-item">
-                                <h4>?? 首�?</h4>
-                                <p>顯示?�?�可?��??��???/p>
-                            </div>
-                            <div class="help-item">
-                                <h4>?��? ?��??��?</h4>
-                                <p>?��?已收?��??��???/p>
-                            </div>
-                            <div class="help-item">
-                                <h4>?? ?�覽記�?</h4>
-                                <p>?��??�近瀏覽?��??��???/p>
-                            </div>
-                            <div class="help-item">
-                                <h4>?�� ?��??��?</h4>
-                                <p>?�瀏覽次數?��??�熱?�?��???/p>
-                            </div>
-                            <div class="help-item">
-                                <h4>?? ?��??��?</h4>
-                                <p>?�於?��?位置?��?近優?��?模擬?�能�?/p>
-                            </div>
-                            <div class="help-item">
-                                <h4>???��?活�?</h4>
-                                <p>?��??��??��??�優?�券</p>
+                                <h4>如何查看我的收藏？</h4>
+                                <p>點擊左側邊欄的「我的收藏」，或點擊右上角會員選單中的「我的收藏」。</p>
                             </div>
                         </div>
                         
-                        <!-- ?�絡資�? -->
+                        <!-- 功能說明 -->
                         <div class="profile-section">
-                            <h3 class="section-title">?�絡?��?/h3>
+                            <h3 class="section-title">功能說明</h3>
                             <div class="help-item">
-                                <p><strong>客�?信箱�?/strong> support@songhokang.com</p>
-                                <p><strong>客�??�話�?/strong> 0800-123-456</p>
-                                <p><strong>?��??��?�?/strong> ?��??�週�? 09:00-18:00</p>
+                                <h4>🏠 首頁</h4>
+                                <p>顯示所有可用的優惠券</p>
+                            </div>
+                            <div class="help-item">
+                                <h4>❤️ 我的收藏</h4>
+                                <p>查看已收藏的優惠券</p>
+                            </div>
+                            <div class="help-item">
+                                <h4>🕒 瀏覽記錄</h4>
+                                <p>查看最近瀏覽過的優惠券</p>
+                            </div>
+                            <div class="help-item">
+                                <h4>🔥 熱門優惠</h4>
+                                <p>按瀏覽次數排序的熱門優惠券</p>
+                            </div>
+                            <div class="help-item">
+                                <h4>📍 附近優惠</h4>
+                                <p>基於地理位置的附近優惠（模擬功能）</p>
+                            </div>
+                            <div class="help-item">
+                                <h4>⏰ 限時活動</h4>
+                                <p>即將到期的限時優惠券</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 聯絡資訊 -->
+                        <div class="profile-section">
+                            <h3 class="section-title">聯絡我們</h3>
+                            <div class="help-item">
+                                <p><strong>客服信箱：</strong> support@songhokang.com</p>
+                                <p><strong>客服電話：</strong> 0800-123-456</p>
+                                <p><strong>服務時間：</strong> 週一至週五 09:00-18:00</p>
                             </div>
                         </div>
                         
                         <div class="profile-actions">
-                            <button onclick="closeHelp()" class="btn-primary">?��?</button>
+                            <button onclick="closeHelp()" class="btn-primary">關閉</button>
                         </div>
                     </div>
                 </div>
@@ -1326,7 +1386,7 @@
             document.body.appendChild(helpModal);
             document.body.style.overflow = 'hidden';
 
-            // 添�?點�??�景?��??�能
+            // 添加點擊背景關閉功能
             addClickOutsideToClose(helpModal, closeHelp);
         }
 
@@ -1338,7 +1398,7 @@
             }
         }
 
-        // ?�用?�數：為模�?視�?添�?點�??�景?��??�能
+        // 通用函數：為模態視窗添加點擊背景關閉功能
         function addClickOutsideToClose(modalElement, closeFunction) {
             modalElement.addEventListener('click', (e) => {
                 if (e.target === e.currentTarget) {
@@ -1347,7 +1407,7 @@
             });
         }
 
-        // 添�??�瀏覽記�?
+        // 添加到瀏覽記錄
         function addToHistory(coupon) {
             const existingIndex = historyData.findIndex(item => item.id === coupon.id);
             if (existingIndex !== -1) {
@@ -1359,7 +1419,7 @@
                 timestamp: Date.now()
             });
 
-            // ?�制記�??��?
+            // 限制記錄數量
             if (historyData.length > 50) {
                 historyData = historyData.slice(0, 50);
             }
@@ -1368,52 +1428,58 @@
             updateSidebarCounts();
         }
 
-        // ?��??�面?��??��??��??�鍵??        function getPageSwitchKey() {
-            // ?��??��??�面路�??��??��??��??��??�鍵??            const path = window.location.pathname;
+        // 獲取頁面特定的切換狀態鍵值
+        function getPageSwitchKey() {
+            // 根據當前頁面路徑生成唯一的切換狀態鍵值
+            const path = window.location.pathname;
             if (path.includes('vendor')) return 'switched_from_admin_vendor';
             if (path.includes('admin')) return 'switched_from_admin_admin';
-            return 'switched_from_admin_customer'; // ?�台?�面
+            return 'switched_from_admin_customer'; // 前台頁面
         }
 
-        // ?��?管�??��??��?�?        function handleAdminSwitch() {
+        // 處理管理員切換會話
+        function handleAdminSwitch() {
             const urlParams = new URLSearchParams(window.location.search);
             const switchSessionId = urlParams.get('switch_session');
 
             if (switchSessionId) {
                 try {
-                    // �?sessionStorage ?��??��??��?
+                    // 從 sessionStorage 獲取切換數據
                     const switchDataStr = sessionStorage.getItem(switchSessionId);
                     if (switchDataStr) {
                         const switchData = JSON.parse(switchDataStr);
 
-                        // 檢查?�否?��??��?話模�?                        if (switchData.isolatedSession) {
-                            console.log('?��??�離?�話?��?:', switchData);
+                        // 檢查是否為隔離會話模式
+                        if (switchData.isolatedSession) {
+                            console.log('處理隔離會話切換:', switchData);
 
-                            // 保�??��??�面?��?始�?話�??��?如�??��?話�?
+                            // 保存當前頁面的原始會話狀態（如果有的話）
                             const currentPageSession = {
                                 token: localStorage.getItem(LS_TOKEN),
                                 user: localStorage.getItem(LS_USER),
                                 timestamp: Date.now()
                             };
 
-                            // 如�??��??�面?��?話�?保�??�臨?��?�?                            const tempSessionKey = `temp_original_session_${switchData.user.role}`;
+                            // 如果當前頁面有會話，保存到臨時位置
+                            const tempSessionKey = `temp_original_session_${switchData.user.role}`;
                             if (currentPageSession.token) {
                                 localStorage.setItem(tempSessionKey, JSON.stringify(currentPageSession));
                             }
 
-                            // 使用角色專屬?�鍵?�設置�?話�??��?影響?��?角色
+                            // 使用角色專屬的鍵值設置會話，避免影響其他角色
                             const targetTokenKey = switchData.targetTokenKey || LS_TOKEN;
                             const targetUserKey = switchData.targetUserKey || LS_USER;
 
                             localStorage.setItem(targetTokenKey, switchData.token);
                             localStorage.setItem(targetUserKey, JSON.stringify(switchData.user));
 
-                            // ?��??�容?��?�?��，�?設置?�用?�值�?但這只影響?��??��?�?                            localStorage.setItem(LS_TOKEN, switchData.token);
+                            // 為了兼容現有代碼，也設置通用鍵值（但這只影響當前分頁）
+                            localStorage.setItem(LS_TOKEN, switchData.token);
                             localStorage.setItem(LS_USER, JSON.stringify(switchData.user));
 
                             currentUser = switchData.user;
 
-                            // 使用?�面?��??�鍵?�儲存管?�員?��?資�?
+                            // 使用頁面特定的鍵值儲存管理員切換資訊
                             const pageSwitchKey = getPageSwitchKey();
                             const switchInfo = {
                                 ...switchData.switched_from_admin,
@@ -1421,53 +1487,57 @@
                                 targetRole: switchData.user.role,
                                 originalSession: switchData.originalSession,
                                 tempSession: currentPageSession,
-                                pageType: pageSwitchKey // 記�??�面類�?
+                                pageType: pageSwitchKey // 記錄頁面類型
                             };
                             localStorage.setItem(pageSwitchKey, JSON.stringify(switchInfo));
 
                         } else {
-                            // ?��??��??�模式�??��??�容�?                            localStorage.setItem(LS_TOKEN, switchData.token);
+                            // 舊版非隔離模式（向後兼容）
+                            localStorage.setItem(LS_TOKEN, switchData.token);
                             localStorage.setItem(LS_USER, JSON.stringify(switchData.user));
                             currentUser = switchData.user;
                             const pageSwitchKey = getPageSwitchKey();
                             localStorage.setItem(pageSwitchKey, JSON.stringify(switchData.switched_from_admin));
                         }
 
-                        // 清�? sessionStorage
+                        // 清理 sessionStorage
                         sessionStorage.removeItem(switchSessionId);
 
-                        // 移除 URL ?�數
+                        // 移除 URL 參數
                         window.history.replaceState({}, document.title, window.location.pathname);
 
-                        // 強制?�新?�入UI，確保�??�選?�正確顯�?                        setTimeout(() => {
+                        // 強制更新登入UI，確保會員選單正確顯示
+                        setTimeout(() => {
                             updateLoginUI();
                         }, 100);
 
-                        // 顯示?��??��?消息
+                        // 顯示切換成功消息
                         setTimeout(() => {
-                            showSuccessMessage(`?? 已�??�到?�戶??{switchData.user.username}?�\n???�面?�離模�?：其他�??��?話�??�影?�\n\n點�??��?角�?��?標可?�入?�人中�?`);
+                            showSuccessMessage(`🔄 已切換到用戶「${switchData.user.username}」\n✅ 頁面隔離模式：其他頁面會話不受影響\n\n點擊右上角👤圖標可進入個人中心`);
                         }, 500);
 
-                        console.log('管�??��??��?話�??��???', switchData.user);
+                        console.log('管理員切換會話處理完成:', switchData.user);
                     }
                 } catch (error) {
-                    console.error('?��?管�??��??��?話失??', error);
+                    console.error('處理管理員切換會話失敗:', error);
                 }
             }
         }
 
-        // 檢查?�否?�管?�員?��??��?�?        function isAdminSwitchedSession() {
+        // 檢查是否為管理員切換的會話
+        function isAdminSwitchedSession() {
             const pageSwitchKey = getPageSwitchKey();
             return localStorage.getItem(pageSwitchKey) !== null;
         }
 
-        // 顯示管�??��??��???        function showAdminSwitchStatus() {
+        // 顯示管理員切換狀態
+        function showAdminSwitchStatus() {
             if (isAdminSwitchedSession()) {
                 try {
                     const pageSwitchKey = getPageSwitchKey();
                     const switchInfo = JSON.parse(localStorage.getItem(pageSwitchKey));
 
-                    // 檢查?�否已�?顯示?�?��?
+                    // 檢查是否已經顯示狀態列
                     if (document.getElementById('admin-switch-status')) {
                         return;
                     }
@@ -1490,27 +1560,29 @@
                         backdrop-filter: blur(10px);
                     `;
 
-                    const switchTime = switchInfo.switched_at ? new Date(switchInfo.switched_at).toLocaleString() : '?�知';
+                    const switchTime = switchInfo.switched_at ? new Date(switchInfo.switched_at).toLocaleString() : '未知';
                     statusDiv.innerHTML = `
-                        ?? 管�??��??�模�?| ?��?身份: ${getUser()?.username || currentUser?.username || '?�知'} | 
-                        ?�面: ?�台 | ?��??��?: ${switchTime} | 
-                        <button onclick="clearAdminSwitch()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 12px; border-radius: 6px; margin-left: 8px; cursor: pointer; font-size: 13px; transition: all 0.2s ease;">結�??��?</button>
+                        🔄 管理員切換模式 | 目前身份: ${getUser()?.username || currentUser?.username || '未知'} | 
+                        頁面: 前台 | 切換時間: ${switchTime} | 
+                        <button onclick="clearAdminSwitch()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 12px; border-radius: 6px; margin-left: 8px; cursor: pointer; font-size: 13px; transition: all 0.2s ease;">結束切換</button>
                     `;
 
                     document.body.appendChild(statusDiv);
 
-                    // 調整?�面底部?��?，避?�內容被?��?
+                    // 調整頁面底部邊距，避免內容被遮擋
                     document.body.style.paddingBottom = '60px';
                 } catch (error) {
-                    console.error('顯示管�??��??��??�失??', error);
+                    console.error('顯示管理員切換狀態失敗:', error);
                 }
             }
         }
 
-        // 清除管�??��??��???        function clearAdminSwitch() {
-            if (confirm('確�?要�??�管?�員?��?模�??��??��?清除?��??�面?��?話�?)) {
+        // 清除管理員切換狀態
+        function clearAdminSwitch() {
+            if (confirm('確定要結束管理員切換模式嗎？這將清除當前頁面的會話。')) {
                 try {
-                    // ?��??�面?��??��??��?�?                    const pageSwitchKey = getPageSwitchKey();
+                    // 獲取頁面特定的切換資訊
+                    const pageSwitchKey = getPageSwitchKey();
                     const switchInfoStr = localStorage.getItem(pageSwitchKey);
                     let switchInfo = null;
 
@@ -1518,20 +1590,23 @@
                         switchInfo = JSON.parse(switchInfoStr);
                     }
 
-                    // 清除?��??�面?��??�相?��?�?                    localStorage.removeItem(pageSwitchKey);
+                    // 清除當前頁面的切換相關資訊
+                    localStorage.removeItem(pageSwitchKey);
 
-                    // 如�??��??��?話模式�??�試?�復?��??�話
+                    // 如果是隔離會話模式，嘗試恢復原始會話
                     if (switchInfo && switchInfo.isolatedSession) {
-                        console.log('?�復?�面?�離?�話模�??��?始�???);
+                        console.log('恢復頁面隔離會話模式的原始狀態');
 
-                        // 清除?��??��??��?�?                        if (switchInfo.targetRole) {
+                        // 清除當前切換的會話
+                        if (switchInfo.targetRole) {
                             const targetTokenKey = `authToken_${switchInfo.targetRole}`;
                             const targetUserKey = `user_${switchInfo.targetRole}`;
                             localStorage.removeItem(targetTokenKey);
                             localStorage.removeItem(targetUserKey);
                         }
 
-                        // ?�復?��??�面?�話（�??��??�話�?                        const tempSessionKey = `temp_original_session_${switchInfo.targetRole}`;
+                        // 恢復原始頁面會話（如果有的話）
+                        const tempSessionKey = `temp_original_session_${switchInfo.targetRole}`;
                         const tempSessionStr = localStorage.getItem(tempSessionKey);
                         if (tempSessionStr) {
                             try {
@@ -1542,35 +1617,37 @@
                                 }
                                 localStorage.removeItem(tempSessionKey);
                             } catch (e) {
-                                console.error('?�復?��??�話失�?:', e);
+                                console.error('恢復原始會話失敗:', e);
                             }
                         } else {
-                            // 沒�??��??�話，�??�通用?��?                            localStorage.removeItem(LS_TOKEN);
+                            // 沒有原始會話，清除通用鍵值
+                            localStorage.removeItem(LS_TOKEN);
                             localStorage.removeItem(LS_USER);
                         }
                     } else {
-                        // ?��??�模式�?清除?�用?�話
+                        // 非隔離模式，清除通用會話
                         localStorage.removeItem(LS_TOKEN);
                         localStorage.removeItem(LS_USER);
                     }
 
                     currentUser = null;
 
-                    // 移除?�?��?
+                    // 移除狀態列
                     const statusDiv = document.getElementById('admin-switch-status');
                     if (statusDiv) {
                         statusDiv.remove();
                     }
 
-                    // ?�復?�面?��?
+                    // 恢復頁面邊距
                     document.body.style.paddingBottom = '';
 
-                    // ?�新載入?�面
+                    // 重新載入頁面
                     window.location.reload();
 
                 } catch (error) {
-                    console.error('清除?��??�?�失??', error);
-                    // ?��??�誤?��?強制清�??�?�相?�數??                    const pageSwitchKey = getPageSwitchKey();
+                    console.error('清除切換狀態失敗:', error);
+                    // 發生錯誤時，強制清理所有相關數據
+                    const pageSwitchKey = getPageSwitchKey();
                     localStorage.removeItem(pageSwitchKey);
                     localStorage.removeItem('temp_original_session_customer');
                     localStorage.removeItem('temp_original_session_vendor');
@@ -1581,12 +1658,16 @@
             }
         }
 
-        // 事件??��??        document.addEventListener('DOMContentLoaded', function () {
-            // ?��??�當?�用??            currentUser = getUser();
+        // 事件監聽器
+        document.addEventListener('DOMContentLoaded', function () {
+            // 初始化當前用戶
+            currentUser = getUser();
 
-            // ?��?管�??��??��?�?            handleAdminSwitch();
+            // 處理管理員切換會話
+            handleAdminSwitch();
 
-            // 檢查認�?並顯示�??��???            setTimeout(() => {
+            // 檢查認證並顯示切換狀態
+            setTimeout(() => {
                 showAdminSwitchStatus();
             }, 100);
 
@@ -1595,7 +1676,7 @@
             setupSidebarToggle();
             renderSearchHistory();
 
-            // 清�??��??�瀏覽記�?
+            // 清理無效的瀏覽記錄
             setTimeout(() => {
                 const validHistoryData = historyData.filter(item =>
                     coupons.some(coupon => coupon.id === item.id)
@@ -1607,14 +1688,16 @@
                 }
 
                 updateSidebarCounts();
-            }, 1000); // 等�??��??�數?��??��???
+            }, 1000); // 等待優惠券數據載入完成
+
             updateSidebarCounts();
 
-            // ?�用?�戶設�?
+            // 應用用戶設定
             const settings = JSON.parse(localStorage.getItem('userSettings') || '{}');
             applySettings(settings);
 
-            // 行�??�側欄�???            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            // 行動版側欄切換
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
             const sidebar = document.querySelector('.sidebar');
             const backdrop = document.getElementById('backdrop');
             const closeMobileMenu = () => { sidebar.classList.remove('open'); backdrop.style.display = 'none'; hamburgerBtn.setAttribute('aria-expanded', 'false'); };
@@ -1623,13 +1706,14 @@
                 if (sidebar.classList.contains('open')) { closeMobileMenu(); } else { openMobileMenu(); }
             });
             backdrop.addEventListener('click', closeMobileMenu);
-            // ?��?欄�??��??��?�?            document.querySelectorAll('.sidebar-item[data-action]').forEach(item => {
+            // 側邊欄項目點擊事件
+            document.querySelectorAll('.sidebar-item[data-action]').forEach(item => {
                 item.addEventListener('click', (e) => {
                     e.preventDefault();
                     const action = item.getAttribute('data-action');
                     if (action) {
                         handleSidebarAction(action);
-                        // 行�??�自?��??�側?��?
+                        // 行動版自動關閉側邊欄
                         if (window.innerWidth <= 768) {
                             closeMobileMenu();
                         }
@@ -1637,16 +1721,19 @@
                 });
             });
 
-            // ?�入?��??��???            const loginBtn = document.querySelector('.login-btn');
+            // 登入按鈕與狀態
+            const loginBtn = document.querySelector('.login-btn');
             updateLoginUI();
             const roleMenu = document.getElementById('roleMenu');
             const toggleRoleMenu = () => { roleMenu.classList.toggle('active'); };
             loginBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleRoleMenu(); });
             document.addEventListener('click', (e) => { if (!e.target.closest('#roleMenu')) roleMenu.classList.remove('active'); });
-            // 點�??��??��??��??�data-role屬性�??��??��?�?            document.querySelectorAll('#roleMenu .role-item[data-role]').forEach(btn => btn.addEventListener('click', (e) => {
+            // 點角色項目（僅對有data-role屬性的元素生效）
+            document.querySelectorAll('#roleMenu .role-item[data-role]').forEach(btn => btn.addEventListener('click', (e) => {
                 const role = e.currentTarget.getAttribute('data-role');
-                if (!role) return; // 如�?沒�?data-role屬性�?不執�?                roleMenu.classList.remove('active');
-                window.__selectedRole = role; // 設�??�選角色，�? openAuth 使用
+                if (!role) return; // 如果沒有data-role屬性，不執行
+                roleMenu.classList.remove('active');
+                window.__selectedRole = role; // 設定預選角色，供 openAuth 使用
                 if (role === 'admin') { openAuth('login'); }
                 else if (role === 'vendor') { openAuth('register'); }
                 else { openAuth('register'); }
@@ -1664,14 +1751,15 @@
             document.getElementById('loginForm').addEventListener('submit', onLoginSubmit);
             document.getElementById('registerForm').addEventListener('submit', onRegisterSubmit);
 
-            // 註�?角色?��??�顯�??��?廠�?欄�?
-            // 已移?��??��??��?保�?欄�?顯示??openAuth ?�制
+            // 註冊角色切換時顯示/隱藏廠商欄位
+            // 已移除角色切換，保留欄位顯示由 openAuth 控制
 
-            // ?��?框�?�?            const searchInput = document.getElementById('searchInput');
+            // 搜尋框事件
+            const searchInput = document.getElementById('searchInput');
             const searchDropdown = document.getElementById('searchDropdown');
             const searchWrapper = document.getElementById('searchWrapper');
 
-            // 點�??��?框容?��??�焦?�輸?��?
+            // 點擊搜尋框容器時聚焦到輸入框
             searchWrapper.addEventListener('click', (e) => {
                 if (e.target !== searchInput) {
                     searchInput.focus();
@@ -1680,9 +1768,10 @@
 
             searchInput.addEventListener('focus', () => {
                 searchDropdown.classList.add('active');
-                updateDropdownSelection(); // ?�新?�中?�??            });
+                updateDropdownSelection(); // 更新選中狀態
+            });
 
-            // ??Enter ?��??��??��?
+            // 按 Enter 鍵時執行搜尋
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     const searchTerm = searchInput.value.trim();
@@ -1694,31 +1783,35 @@
                 }
             });
 
-            // 輸入?�即?�篩?��?不�??��?尋�??��?
+            // 輸入時即時篩選（不記錄搜尋紀錄）
             searchInput.addEventListener('input', () => {
                 performSearch();
             });
 
-            // 點�??��?框�??��??��??�選??            document.addEventListener('click', (e) => {
+            // 點擊搜尋框外部關閉下拉選單
+            document.addEventListener('click', (e) => {
                 if (!e.target.closest('.search-container')) {
                     searchDropdown.classList.remove('active');
                     closeFilterPanel();
                 }
             });
 
-            // ?��?篩選?��?事件
+            // 進階篩選按鈕事件
             document.getElementById('filterToggleBtn').addEventListener('click', (e) => {
                 e.stopPropagation();
                 toggleFilterPanel();
             });
 
-            // Logo 點�??��??��?�?            document.querySelector('.logo').addEventListener('click', (e) => {
+            // Logo 點擊回首頁事件
+            document.querySelector('.logo').addEventListener('click', (e) => {
                 e.preventDefault();
                 resetToHomepage();
             });
 
-            // ?��??��?欄�?件監?�器已移?��?使用?��?data-action屬性�???
-            // ?�近�?尋�??��??��?�?            document.querySelectorAll('.recent-item').forEach(item => {
+            // 舊的側邊欄事件監聽器已移除，使用新的data-action屬性處理
+
+            // 最近搜尋項目點擊事件
+            document.querySelectorAll('.recent-item').forEach(item => {
                 item.addEventListener('click', () => {
                     const searchTerm = item.getAttribute('data-search');
                     addTag(searchTerm, 'search');
@@ -1726,18 +1819,21 @@
                 });
             });
 
-            // ?��?標籤點�?事件 (?�援複選)
+            // 分類標籤點擊事件 (支援複選)
             document.querySelectorAll('.category-chip').forEach(item => {
                 item.addEventListener('click', () => {
                     const category = item.getAttribute('data-category');
                     const categoryText = item.querySelector('.category-chip-text').textContent;
 
-                    // 檢查?�否已選�?                    const isSelected = selectedTags.some(tag => tag.text === categoryText);
+                    // 檢查是否已選中
+                    const isSelected = selectedTags.some(tag => tag.text === categoryText);
 
                     if (isSelected) {
-                        // 如�?已選中�??�移??                        removeTag(categoryText);
+                        // 如果已選中，則移除
+                        removeTag(categoryText);
                     } else {
-                        // 如�??�選中�??�添?�並保�??��?紀??                        addTag(categoryText, 'category');
+                        // 如果未選中，則添加並保存搜尋紀錄
+                        addTag(categoryText, 'category');
                         saveSearchHistory(categoryText);
                     }
 
@@ -1745,17 +1841,20 @@
                 });
             });
 
-            // ?��?標籤點�?事件 (?�援複選)
+            // 熱門標籤點擊事件 (支援複選)
             document.querySelectorAll('.trending-tag').forEach(item => {
                 item.addEventListener('click', () => {
                     const tag = item.getAttribute('data-tag');
 
-                    // 檢查?�否已選�?                    const isSelected = selectedTags.some(selectedTag => selectedTag.text === tag);
+                    // 檢查是否已選中
+                    const isSelected = selectedTags.some(selectedTag => selectedTag.text === tag);
 
                     if (isSelected) {
-                        // 如�?已選中�??�移??                        removeTag(tag);
+                        // 如果已選中，則移除
+                        removeTag(tag);
                     } else {
-                        // 如�??�選中�??�添?�並保�??��?紀??                        addTag(tag, 'trending');
+                        // 如果未選中，則添加並保存搜尋紀錄
+                        addTag(tag, 'trending');
                         saveSearchHistory(tag);
                     }
 
@@ -1763,23 +1862,25 @@
                 });
             });
 
-            // 彈�??��?事件
+            // 彈窗關閉事件
             document.getElementById('modalClose').addEventListener('click', (e) => { e.stopPropagation(); closeModal(); });
             document.getElementById('modalOverlay').addEventListener('click', (e) => {
                 if (e.target === e.currentTarget) {
                     closeModal();
                 }
             });
-            // ?�箱?��?事件
+            // 燈箱關閉事件
             const lightboxOverlay = document.getElementById('lightboxOverlay');
             lightboxOverlay.addEventListener('click', (e) => {
-                // 點�?黑色?�?��??��?角�??��??��??��???                if (e.target === e.currentTarget || e.target.id === 'lightboxClose') {
+                // 點擊黑色區域或右上角關閉按鈕皆可關閉
+                if (e.target === e.currentTarget || e.target.id === 'lightboxClose') {
                     closeLightbox();
                 }
             });
             document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
 
-            // ESC ?��??��?�?            document.addEventListener('keydown', (e) => {
+            // ESC 鍵關閉彈窗
+            document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     closeModal();
                     closeLightbox();
@@ -1787,7 +1888,7 @@
             });
         });
 
-        // ?�入 UI ?�制
+        // 登入 UI 控制
         function updateLoginUI() {
             const btn = document.querySelector('.login-btn');
             const roleMenu = document.getElementById('roleMenu');
@@ -1800,65 +1901,69 @@
                 const avatarUrl = user?.avatar ? (user.avatar.startsWith('http') ? user.avatar : (user.avatar.startsWith('/') ? user.avatar : '/' + user.avatar)) : '';
 
                 if (role === 'customer') {
-                    // 一?��??��?顯示?��?（�??�用?��??��?顯示?�示�?                    btn.innerHTML = avatarUrl
+                    // 一般會員：顯示頭像（有則用圖，無則顯示圖示）
+                    btn.innerHTML = avatarUrl
                         ? `<img src="${avatarUrl}" alt="avatar" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">`
-                        : `<span style="color: #FCA311;">?��</span>`;
-                    btn.title = `?�員�?{user?.username || user?.email || '?�知'}`;
+                        : `<span style="color: #FCA311;">👤</span>`;
+                    btn.title = `會員：${user?.username || user?.email || '未知'}`;
 
-                    // ?�新角色?�單?�簡?��??�員?�單
+                    // 更新角色選單為簡化的會員選單
                     roleMenu.innerHTML = `
                         <div style="padding: 8px 12px; border-bottom: 1px solid rgba(0,0,0,0.1); margin-bottom: 4px;">
-                            <div style="font-size: 12px; color: #666; margin-bottom: 2px;">?�員</div>
-                            <div style="font-size: 14px; font-weight: 600; color: #333;">${user?.username || user?.email || '?�知?�戶'}</div>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 2px;">會員</div>
+                            <div style="font-size: 14px; font-weight: 600; color: #333;">${user?.username || user?.email || '未知用戶'}</div>
                         </div>
                         <button class="role-item member-action" onclick="goToProfile()">
-                            <span style="margin-right: 8px;">?��</span>?�人中�?
+                            <span style="margin-right: 8px;">👤</span>個人中心
                         </button>
                         <button class="role-item member-action" onclick="viewFavorites()">
-                            <span style="margin-right: 8px;">?��?</span>?��??��? <span class="menu-badge" id="menuFavCount"></span>
+                            <span style="margin-right: 8px;">❤️</span>我的收藏 <span class="menu-badge" id="menuFavCount"></span>
                         </button>
                         <div style="border-top: 1px solid rgba(0,0,0,0.1); margin-top: 4px; padding-top: 4px;">
                             <button class="role-item member-action" onclick="logout()" style="color: #dc2626;">
-                                <span style="margin-right: 8px;">?��</span>?�出
+                                <span style="margin-right: 8px;">🚪</span>登出
                             </button>
                         </div>
                     `;
 
-                    // 移除?�?��??�data-role屬性�??��?事件??��?��?�?                    document.querySelectorAll('#roleMenu .role-item').forEach(item => {
+                    // 移除所有舊的data-role屬性，避免事件監聽器衝突
+                    document.querySelectorAll('#roleMenu .role-item').forEach(item => {
                         item.removeAttribute('data-role');
                     });
 
-                    // ?�新?�員?�單中�?徽�?計數
+                    // 更新會員選單中的徽章計數
                     updateSimpleMemberMenuBadges();
                 } else {
-                    // 管�??��?廠�?：顯示頭?��??�出?�示
+                    // 管理員或廠商：顯示頭像或登出圖示
                     if (avatarUrl) {
                         btn.innerHTML = `<img src="${avatarUrl}" alt="avatar" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">`;
                     } else {
-                        btn.textContent = '??;
+                        btn.textContent = '⎋';
                     }
-                    btn.title = '?�出';
+                    btn.title = '登出';
                     roleMenu.innerHTML = `
                         <button class="role-item" onclick="logout()" style="color: #dc2626;">
-                            <span style="margin-right: 8px;">?��</span>?�出
+                            <span style="margin-right: 8px;">🚪</span>登出
                         </button>
                     `;
                 }
             } else {
-                // ?�登?��?顯示角色?��?
-                btn.textContent = '?��';
-                btn.title = '?�入';
+                // 未登入：顯示角色選擇
+                btn.textContent = '👤';
+                btn.title = '登入';
                 roleMenu.innerHTML = `
-                    <button class="role-item" data-role="customer">一?�用??/button>
-                    <button class="role-item" data-role="vendor">廠�?後台</button>
-                    <button class="role-item" data-role="admin">管�?後台</button>
+                    <button class="role-item" data-role="customer">一般用戶</button>
+                    <button class="role-item" data-role="vendor">廠商後台</button>
+                    <button class="role-item" data-role="admin">管理後台</button>
                 `;
 
-                // ?�新綁�?角色?��?事件（�??�用?�未?�入?�?��?角色?�單�?                setTimeout(() => {
+                // 重新綁定角色選擇事件（僅適用於未登入狀態的角色選單）
+                setTimeout(() => {
                     document.querySelectorAll('#roleMenu .role-item[data-role]').forEach(btn => {
                         btn.addEventListener('click', (e) => {
                             const role = e.currentTarget.getAttribute('data-role');
-                            if (!role) return; // 如�?沒�?data-role屬性�?不執�?                            roleMenu.classList.remove('active');
+                            if (!role) return; // 如果沒有data-role屬性，不執行
+                            roleMenu.classList.remove('active');
                             window.__selectedRole = role;
                             if (role === 'admin') { openAuth('login'); }
                             else if (role === 'vendor') { openAuth('register'); }
@@ -1869,7 +1974,7 @@
             }
         }
 
-        // ?�員?�能已整?�到?��??�個人?�面 (profile.html)
+        // 會員功能已整合到獨立的個人頁面 (profile.html)
 
 
 
@@ -1879,7 +1984,7 @@
         async function viewFavorites() {
             document.getElementById('roleMenu').classList.remove('active');
 
-            // 如�?已登?��?從API載入?��??�表
+            // 如果已登入，從API載入收藏列表
             if (isLoggedIn()) {
                 try {
                     const res = await fetch('api/favorites', {
@@ -1887,41 +1992,42 @@
                     });
                     const json = await res.json();
                     if (json.success && json.data?.favorites) {
-                        // ?�新?�地?��??�表
+                        // 更新本地收藏列表
                         const favoriteIds = json.data.favorites.map(fav => fav.id);
                         setFavorites(favoriteIds);
                     }
                 } catch (e) {
-                    console.warn('載入?��??�表失�?:', e);
+                    console.warn('載入收藏列表失敗:', e);
                 }
             }
 
-            // 設置?��?欄活?��???            setSidebarActive('favorites');
+            // 設置側邊欄活動狀態
+            setSidebarActive('favorites');
             setView('favorites');
-            renderCoupons(); // ?�新渲�??��??�以顯示?��??�容
-            showSuccessMessage('?��??�收?��???);
+            renderCoupons(); // 重新渲染優惠券以顯示收藏內容
+            showSuccessMessage('切換到收藏頁面');
         }
 
         function viewHistory() {
             document.getElementById('roleMenu').classList.remove('active');
 
-            // ?�接使用?��?欄�?歷史記�??�能
+            // 直接使用側邊欄的歷史記錄功能
             setSidebarActive('history');
             showHistory();
-            showSuccessMessage(`已顯�?${historyData.length} 筆瀏覽記�?`);
+            showSuccessMessage(`已顯示 ${historyData.length} 筆瀏覽記錄`);
         }
 
         function logout() {
             document.getElementById('roleMenu').classList.remove('active');
             clearAuth();
             setView('home');
-            showSuccessMessage('已�??�登??);
+            showSuccessMessage('已成功登出');
         }
 
-        // ?�新簡�??�員?�單徽�?計數
+        // 更新簡化會員選單徽章計數
         function updateSimpleMemberMenuBadges() {
             setTimeout(() => {
-                // ?��??��?
+                // 收藏數量
                 const favCount = getFavorites().length;
                 const menuFavBadge = document.getElementById('menuFavCount');
                 if (menuFavBadge) {
@@ -1935,15 +2041,15 @@
             }, 100);
         }
 
-        // 跳�??�個人中�??�面
+        // 跳轉到個人中心頁面
         function goToProfile() {
             document.getElementById('roleMenu').classList.remove('active');
             window.location.href = 'profile.html';
         }
 
-        // 移除複�??��??��??��?統�??�個人?�面?��?
+        // 移除複雜的會員功能，統一到個人頁面處理
 
-        // ?��?篩選?�能
+        // 進階篩選功能
         function toggleFilterPanel() {
             const panel = document.getElementById('filterPanel');
             const btn = document.getElementById('filterToggleBtn');
@@ -1961,10 +2067,10 @@
             const btn = document.getElementById('filterToggleBtn');
             const dropdown = document.getElementById('searchDropdown');
 
-            // ?��??��?下�??�單
+            // 關閉搜尋下拉選單
             dropdown.classList.remove('active');
 
-            // ?��?篩選?�板
+            // 開啟篩選面板
             panel.style.display = 'block';
             btn.classList.add('active');
         }
@@ -1978,26 +2084,26 @@
         }
 
         function clearAllFilters() {
-            // 清除?��?篩選
+            // 清除分類篩選
             document.querySelectorAll('#categoryFilters input[type="checkbox"]').forEach(cb => {
                 cb.checked = false;
             });
 
-            // ?�置?��??��?篩選
+            // 重置到期時間篩選
             document.querySelector('input[name="expiry"][value="all"]').checked = true;
 
-            // ?�置?��??��?
+            // 重置排序選項
             document.getElementById('sortSelect').value = 'default';
 
-            // ?�新載入?�?�優?�券
+            // 重新載入所有優惠券
             renderCoupons(coupons);
-            showSuccessMessage('已�??��??�篩?��?�?);
+            showSuccessMessage('已清除所有篩選條件');
         }
 
         function applyAdvancedFilters() {
             let filteredCoupons = [...coupons];
 
-            // ?��?篩選
+            // 分類篩選
             const selectedCategories = Array.from(document.querySelectorAll('#categoryFilters input[type="checkbox"]:checked'))
                 .map(cb => cb.value);
 
@@ -2007,7 +2113,7 @@
                 );
             }
 
-            // ?��??��?篩選
+            // 到期時間篩選
             const expiryFilter = document.querySelector('input[name="expiry"]:checked').value;
             if (expiryFilter !== 'all') {
                 const now = new Date();
@@ -2026,7 +2132,7 @@
                 });
             }
 
-            // ?��?
+            // 排序
             const sortBy = document.getElementById('sortSelect').value;
             switch (sortBy) {
                 case 'newest':
@@ -2051,7 +2157,7 @@
             closeFilterPanel();
 
             const count = filteredCoupons.length;
-            showSuccessMessage(`已�??�篩?��?件�??�到 ${count} 張優?�券`);
+            showSuccessMessage(`已套用篩選條件，找到 ${count} 張優惠券`);
         }
 
         function openAuth(mode) {
@@ -2063,7 +2169,7 @@
             const regF = document.getElementById('registerForm');
             if (mode === 'register') { loginF.style.display = 'none'; regF.style.display = 'block'; }
             else { loginF.style.display = 'block'; regF.style.display = 'none'; }
-            // ?��?從�??�選?��??��??�設角色調整表單（隱?��?顯示廠�??��??��?位�?
+            // 根據從角色選單點擊的預設角色調整表單（隱藏或顯示廠商選項與欄位）
             const preselected = window.__selectedRole || 'customer';
             const loginRoleRow = document.getElementById('loginRoleRow');
             const regRoleRow = document.getElementById('regRoleRow');
@@ -2081,9 +2187,9 @@
             document.body.style.overflow = 'auto';
         }
 
-        // 顯示?��?訊息
+        // 顯示成功訊息
         function showSuccessMessage(message) {
-            // ?�建?��??�示
+            // 創建成功提示
             const successDiv = document.createElement('div');
             successDiv.style.cssText = `
                 position: fixed;
@@ -2104,19 +2210,19 @@
             `;
             successDiv.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 18px;">??/span>
+                    <span style="font-size: 18px;">✅</span>
                     <span>${message}</span>
                 </div>
             `;
 
             document.body.appendChild(successDiv);
 
-            // ?�畫顯示
+            // 動畫顯示
             setTimeout(() => {
                 successDiv.style.transform = 'translateX(0)';
             }, 100);
 
-            // 3秒�??��?消失
+            // 3秒後自動消失
             setTimeout(() => {
                 successDiv.style.transform = 'translateX(400px)';
                 setTimeout(() => {
@@ -2131,39 +2237,41 @@
             e.preventDefault();
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
-            if (!username || !password) { showSuccessMessage('請填寫帳?��?密碼'); return; }
+            if (!username || !password) { showSuccessMessage('請填寫帳號和密碼'); return; }
             try {
                 const res = await fetch('api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
                 const json = await res.json();
                 if (json.success) {
                     setAuth(json.data.token, json.data.user);
                     const role = (json.data.user?.role || '').toLowerCase();
-                    // 額�?存�?份到角色專屬 token，方便�?裝置多�?�?                    const roleKey = ROLE_TOKENS[role];
+                    // 額外存一份到角色專屬 token，方便同裝置多會話
+                    const roleKey = ROLE_TOKENS[role];
                     if (roleKey) localStorage.setItem(roleKey, json.data.token);
                     if (role === 'admin') {
-                        showSuccessMessage('?�入?��?，�?往管�?後台');
+                        showSuccessMessage('登入成功，前往管理後台');
                         window.open('admin/', '_blank');
                         closeAuth();
                         return;
                     }
                     if (role === 'vendor') {
-                        showSuccessMessage('?�入?��?，�?往廠�?中�?');
+                        showSuccessMessage('登入成功，前往廠商中心');
                         window.open('vendor/', '_blank');
                         closeAuth();
                         return;
                     }
                     if (role === 'customer') {
-                        showSuccessMessage(`歡�??��?�?{json.data.user?.username || '?�員'}！`);
+                        showSuccessMessage(`歡迎回來，${json.data.user?.username || '會員'}！`);
                         closeAuth();
-                        // 一?��??��??��??��?不跳�?                        return;
+                        // 一般會員留在前台，不跳轉
+                        return;
                     }
                     closeAuth();
-                    showSuccessMessage('?�入?��?');
+                    showSuccessMessage('登入成功');
                 }
-                else { showSuccessMessage(json.message || '?�入失�?'); }
+                else { showSuccessMessage(json.message || '登入失敗'); }
             } catch (err) {
-                console.error('?�入?�誤:', err);
-                showSuccessMessage('網路?�誤，�?稍�??�試');
+                console.error('登入錯誤:', err);
+                showSuccessMessage('網路錯誤，請稍後再試');
             }
         }
 
@@ -2174,38 +2282,39 @@
             const password = document.getElementById('regPassword').value;
             const password2 = document.getElementById('regPassword2').value;
             const phone = document.getElementById('regPhone').value.trim();
-            // 角色?��???openAuth 設�?
+            // 角色固定由 openAuth 設定
             const role = (window.__selectedRole === 'vendor') ? 'vendor' : 'customer';
             const company_name = document.getElementById('regCompany').value.trim();
-            if (!username || !email || !password) { showSuccessMessage('請�??�填寫用?��??�電子郵件�?密碼'); return; }
-            if (password !== password2) { showSuccessMessage('?�次密碼不�???); return; }
-            if (role === 'vendor' && !company_name) { showSuccessMessage('廠�?註�?請填寫公?��?�?); return; }
+            if (!username || !email || !password) { showSuccessMessage('請完整填寫用戶名、電子郵件和密碼'); return; }
+            if (password !== password2) { showSuccessMessage('兩次密碼不一致'); return; }
+            if (role === 'vendor' && !company_name) { showSuccessMessage('廠商註冊請填寫公司名稱'); return; }
             try {
                 const body = { username, email, password, confirm_password: password2, phone, role };
                 if (role === 'vendor') { body.company_name = company_name; }
                 const res = await fetch('api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                 let json;
                 try { json = await res.clone().json(); }
-                catch { const txt = await res.text(); showSuccessMessage('註�?失�?�? + txt); return; }
+                catch { const txt = await res.text(); showSuccessMessage('註冊失敗：' + txt); return; }
                 if (json.success) {
-                    showSuccessMessage('註�??��?，�?使用帳�??�入');
+                    showSuccessMessage('註冊成功，請使用帳密登入');
                     setTimeout(() => openAuth('login'), 1500);
                 } else {
                     const details = json.details ? (typeof json.details === 'string' ? json.details : JSON.stringify(json.details)) : '';
-                    showSuccessMessage((json.message || '註�?失�?') + (details ? ('�? + details) : ''));
+                    showSuccessMessage((json.message || '註冊失敗') + (details ? ('：' + details) : ''));
                 }
             } catch (err) {
-                console.error('註�??�誤:', err);
-                showSuccessMessage('網路?�誤，�?稍�??�試');
+                console.error('註冊錯誤:', err);
+                showSuccessMessage('網路錯誤，請稍後再試');
             }
         }
 
-        // ?��??��?使用彈�??�側?�次要�???        document.addEventListener('click', (e) => {
+        // 收藏鈕：使用彈窗右側的次要按鈕
+        document.addEventListener('click', (e) => {
             if (e.target && e.target.classList.contains('btn-secondary') && currentCoupon) {
                 e.preventDefault();
                 toggleFavorite(currentCoupon).then(() => { syncModalFavoriteButton(); updateFavCount(); });
             }
-            // ?��??�表中�??�除?��?（�?件代?��?
+            // 收藏列表中的刪除按鈕（事件代理）
             if (e.target && e.target.matches('[data-action="remove-fav"]')) {
                 const id = Number(e.target.getAttribute('data-id'));
                 const c = coupons.find(x => x.id === id);
@@ -2219,23 +2328,26 @@
                     });
                 }
             }
-            // ?��??��?角快?�收??            if (e.target && e.target.matches('[data-action="quick-fav"]')) {
+            // 卡片右上角快速收藏
+            if (e.target && e.target.matches('[data-action="quick-fav"]')) {
                 e.stopPropagation();
                 const id = Number(e.target.getAttribute('data-id'));
                 const c = coupons.find(x => x.id === id);
                 if (c) {
                     toggleFavorite(c).then(() => {
-                        // ?��??��?�???�符??                        const btn = e.target;
+                        // 切換愛心樣式與符號
+                        const btn = e.target;
                         const nowFavs = new Set(getFavorites());
                         const active = nowFavs.has(id);
                         btn.classList.toggle('active', active);
-                        btn.textContent = active ? '?? : '??;
+                        btn.textContent = active ? '❤' : '♡';
                         updateFavCount();
-                        // ?�在?��?視�?且已?��??��?，直?�移?�該?��?
+                        // 若在收藏視圖且已取消收藏，直接移除該卡片
                         if (isFavoritesView() && !active) {
                             const card = btn.closest('.coupon-card');
                             if (card) card.remove();
-                            // ?�刪?��?顯示空畫??                            const remain = document.querySelectorAll('.coupon-card').length;
+                            // 若刪光後顯示空畫面
+                            const remain = document.querySelectorAll('.coupon-card').length;
                             if (remain === 0) renderEmptyFavorites();
                         }
                     });
@@ -2243,7 +2355,7 @@
             }
         });
 
-        // ?�新?��?欄收?�數
+        // 更新側邊欄收藏數
         function updateFavCount() {
             const el = document.getElementById('favCount');
             if (!el) return;

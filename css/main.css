@@ -14,9 +14,9 @@
             color: #333;
         }
 
-        /* 移除?�景?�畫，使?��??�漸�?*/
+        /* 移除背景動畫，使用靜態漸變 */
 
-        /* Liquid Glass 流�??��? - 保�??��??�畫 */
+        /* Liquid Glass 流動效果 - 保留其他動畫 */
 
         @keyframes liquidPulse {
 
@@ -34,9 +34,9 @@
             }
         }
 
-        /* 移除?��?浮�??��?，避?�干?�閱讀 */
+        /* 移除卡片浮動效果，避免干擾閱讀 */
 
-        /* Pinterest 風格?�部導航�?*/
+        /* Pinterest 風格頂部導航欄 */
         .header {
             background: transparent;
             padding: 8px 16px;
@@ -61,7 +61,7 @@
             height: 100%;
         }
 
-        /* 漢堡??*/
+        /* 漢堡鍵 */
         .hamburger-btn {
             display: none;
             background: rgba(248, 247, 246, 0.6);
@@ -169,12 +169,12 @@
             color: #666;
         }
 
-        /* 黑�??�色?��? */
+        /* 黑金配色優化 */
         .coupon-card:hover {
             box-shadow: 0 12px 24px rgba(252, 163, 17, 0.15);
         }
 
-        /* ?�中?��?籤樣�?*/
+        /* 選中的標籤樣式 */
         .selected-tags {
             display: flex;
             flex-wrap: wrap;
@@ -263,8 +263,8 @@
             border-color: rgba(252, 163, 17, 0.4);
         }
 
-        /* 角色?�入快速入??*/
-        /* 角色下�??�單 */
+        /* 角色登入快速入口 */
+        /* 角色下拉選單 */
         .role-menu {
             position: absolute;
             top: 50px;
@@ -307,7 +307,7 @@
             border-color: rgba(252, 163, 17, 0.35);
         }
 
-        /* ?�員?�單徽�? */
+        /* 會員選單徽章 */
         .menu-badge {
             background: #FCA311;
             color: white;
@@ -323,7 +323,7 @@
             display: inline-block;
         }
 
-        /* ?�員設�??�目�?? */
+        /* 會員設定項目樣式 */
         .setting-item {
             margin-bottom: 16px;
             padding-bottom: 12px;
@@ -353,7 +353,7 @@
         }
 
 
-        /* Pinterest 風格?��?下�??�單 */
+        /* Pinterest 風格搜尋下拉選單 */
         .search-dropdown {
             position: absolute;
             top: 100%;
@@ -389,7 +389,7 @@
             margin-bottom: 16px;
         }
 
-        /* ?�近�?�?*/
+        /* 最近搜尋 */
         .recent-searches {
             display: flex;
             flex-direction: column;
@@ -420,7 +420,7 @@
             font-size: 14px;
         }
 
-        /* ?�薦?��? */
+        /* 推薦分類 */
         .category-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -458,7 +458,7 @@
             color: #333;
         }
 
-        /* ?��?標籤 */
+        /* 熱門標籤 */
         .search-history {
             display: flex;
             flex-direction: column;
@@ -581,7 +581,7 @@
             box-shadow: 0 6px 16px rgba(252, 163, 17, 0.4);
         }
 
-        /* ?��?後�?左側?��? */
+        /* 優化後的左側邊欄 */
         .sidebar {
             position: fixed;
             left: 0;
@@ -616,7 +616,7 @@
             overflow-x: hidden;
         }
 
-        /* ?��?�?Logo ?��?*/
+        /* 側邊欄 Logo 區塊 */
         .sidebar-logo {
             padding: 16px;
             display: flex;
@@ -639,7 +639,7 @@
         }
 
         .sidebar-logo .logo::before {
-            content: "??;
+            content: "送";
             display: flex;
             align-items: center;
             justify-content: center;
@@ -655,7 +655,7 @@
         }
 
         .sidebar.expanded .sidebar-logo .logo::before {
-            content: "?��?�?;
+            content: "送齁康";
             justify-content: flex-start;
             padding-left: 8px;
         }
@@ -665,16 +665,16 @@
             padding-left: 24px;
         }
 
-        /* ?�戶歡�??��?*/
-        /* 已移?�側?��?歡�??�塊相?�樣�?*/
+        /* 用戶歡迎區塊 */
+        /* 已移除側邊欄歡迎區塊相關樣式 */
 
-        /* ?��?欄主要內容�???*/
+        /* 側邊欄主要內容區域 */
         .sidebar-content {
             flex: 1;
             overflow-y: auto;
         }
 
-        /* ?��?欄�?�?*/
+        /* 側邊欄區塊 */
         .sidebar-section {
             padding: 16px 0;
         }
@@ -799,7 +799,7 @@
             font-size: 20px;
         }
 
-        /* 移除?��?欄�?標�?hover?�大?��? */
+        /* 移除側邊欄圖標的hover放大效果 */
 
         .sidebar-text {
             font-size: 15px;
@@ -814,7 +814,7 @@
             display: none;
         }
 
-        /* ?�知小�?�?*/
+        /* 通知小紅點 */
         .notification-badge {
             background: #ff4444;
             color: #ffffff;
@@ -832,7 +832,7 @@
             display: none;
         }
 
-        /* 統�??��? */
+        /* 統計數字 */
         .sidebar-count {
             font-size: 12px;
             color: #666666;
@@ -872,7 +872,7 @@
             color: #000;
         }
 
-        /* ?��?線優??*/
+        /* 分隔線優化 */
         .sidebar-divider {
             height: 1px;
             background: #e0e0e0;
@@ -880,7 +880,7 @@
             opacity: 0.8;
         }
 
-        /* 底部?��?*/
+        /* 底部區塊 */
         .sidebar-footer {
             margin-top: auto;
             padding: 16px 0;
@@ -893,7 +893,7 @@
             padding: 8px 12px;
         }
 
-        /* 主�??�容?�??*/
+        /* 主要內容區域 */
         .main-content {
             margin-top: 84px;
             margin-left: 60px;
@@ -930,7 +930,7 @@
             }
         }
 
-        /* ?�正??Pinterest ?��?流容??*/
+        /* 真正的 Pinterest 瀑布流容器 */
         .masonry-container {
             column-count: 5;
             column-gap: 16px;
@@ -940,7 +940,7 @@
             column-count: 1;
         }
 
-        /* ?��?式瀑�?�?*/
+        /* 響應式瀑布流 */
         @media (min-width: 1400px) {
             .masonry-container {
                 column-count: 6;
@@ -976,7 +976,7 @@
             }
         }
 
-        /* Pinterest 風格?��?�?? */
+        /* Pinterest 風格卡片樣式 */
         .coupon-card {
             background: rgba(248, 247, 246, 0.7);
             backdrop-filter: blur(20px);
@@ -996,7 +996,7 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.8);
         }
 
-        /* ?��??��??��?（常駐顯示�? */
+        /* 卡片愛心按鈕（常駐顯示） */
         .fav-btn {
             position: absolute;
             top: 10px;
@@ -1088,7 +1088,7 @@
             opacity: 1;
         }
 
-        /* 彈�?�?? */
+        /* 彈窗樣式 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -1260,7 +1260,7 @@
             background: #e1e1e1;
         }
 
-        /* ?��?式設�?*/
+        /* 響應式設計 */
         @media (max-width: 768px) {
             .nav-container {
                 padding: 0 12px;
@@ -1304,7 +1304,7 @@
             }
         }
 
-        /* ?��?篩選�?? */
+        /* 進階篩選樣式 */
         .filter-toggle-btn {
             background: transparent;
             border: none;
@@ -1345,7 +1345,7 @@
             overflow-y: auto;
         }
 
-        /* ?��?篩選?�板?��?式設�?*/
+        /* 進階篩選面板響應式設計 */
         @media (max-width: 768px) {
             .filter-panel {
                 position: fixed;
@@ -1512,7 +1512,7 @@
             font-size: 14px;
         }
 
-        /* ?�人資�?彈�?�?? */
+        /* 個人資料彈窗樣式 */
         .profile-modal-content {
             width: 600px;
             max-width: 90vw;
@@ -1690,7 +1690,7 @@
 
             .form-input {
                 font-size: 16px;
-                /* ?�止iOS縮放 */
+                /* 防止iOS縮放 */
             }
         }
 
@@ -1778,7 +1778,7 @@
             box-shadow: 0 8px 25px rgba(252, 163, 17, 0.4);
         }
 
-        /* 幫助中�?�?? */
+        /* 幫助中心樣式 */
         .help-item {
             margin-bottom: 20px;
             padding: 16px;
