@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * 簡易環境變數載入器
  * 會讀取專案根目錄下的 .env 檔案並將設定寫入 getenv/$_ENV/$_SERVER。
@@ -41,7 +41,7 @@ class Env
             if (!array_key_exists($name, $_SERVER)) {
                 $_SERVER[$name] = $value;
             }
-            putenv(sprintf('%s=%s', $name, $value));
+            putenv($name . '=' . $value);
         }
     }
 
@@ -56,7 +56,6 @@ class Env
         if (($first === '"' && $last === '"') || ($first === "'" && $last === "'")) {
             return substr($value, 1, -1);
         }
-
         return $value;
     }
 }
@@ -69,13 +68,11 @@ if (!function_exists('env')) {
             return $default;
         }
         $trimmed = trim($value);
-        if ($trimmed === '') {
-            return $default;
-        }
-        return $trimmed;
+        return $trimmed === '' ? $default : $trimmed;
     }
 }
-if (!function_exists(''env_bool'')) {
+
+if (!function_exists('env_bool')) {
     function env_bool($key, $default = true)
     {
         $value = env($key, null);
@@ -84,10 +81,10 @@ if (!function_exists(''env_bool'')) {
         }
 
         $normalized = strtolower(trim($value));
-        if ($normalized === ''1'' || $normalized === ''true'' || $normalized === ''yes'' || $normalized === ''on'') {
+        if (in_array($normalized, ['1', 'true', 'yes', 'on'], true)) {
             return true;
         }
-        if ($normalized === ''0'' || $normalized === ''false'' || $normalized === ''no'' || $normalized === ''off'') {
+        if (in_array($normalized, ['0', 'false', 'no', 'off'], true)) {
             return false;
         }
         return $default;
