@@ -1,40 +1,74 @@
 <?php
 /**
- * 系統配置文件
+ * 系統設定檔
  * 送齁康優惠券平台
  */
 
-// 錯誤報告設定
+require_once __DIR__ . '/Env.php';
+Env::load(__DIR__ . '/../.env');
+
+// 錯誤設定
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', env_bool('APP_DEBUG', true) ? '1' : '0');
 
 // 時區設定
-date_default_timezone_set('Asia/Taipei');
+$timezone = env('APP_TIMEZONE', 'Asia/Taipei');
+date_default_timezone_set($timezone);
 
 // 系統常數定義
-define('APP_NAME', '送齁康');
-define('APP_VERSION', '1.0.0');
-define('BASE_URL', 'http://localhost:8000'); // 本機開發網址
-define('UPLOAD_PATH', 'uploads/');
-define('MAX_FILE_SIZE', 5 * 1024 * 1024); // 5MB
+if (!defined('APP_NAME')) {
+    define('APP_NAME', env('APP_NAME', '送齁康'));
+}
+if (!defined('APP_ENV')) {
+    define('APP_ENV', env('APP_ENV', 'local'));
+}
+if (!defined('APP_VERSION')) {
+    define('APP_VERSION', env('APP_VERSION', '1.0.0'));
+}
+if (!defined('BASE_URL')) {
+    $baseUrl = rtrim(env('APP_URL', 'http://localhost:8000'), '/');
+    define('BASE_URL', $baseUrl);
+}
+if (!defined('UPLOAD_PATH')) {
+    define('UPLOAD_PATH', rtrim(env('UPLOAD_PATH', 'uploads/'), '/') . '/');
+}
+if (!defined('MAX_FILE_SIZE')) {
+    define('MAX_FILE_SIZE', (int)env('MAX_FILE_SIZE', 5 * 1024 * 1024));
+}
 
-// JWT 配置
-define('JWT_SECRET', 'your-secret-key-here-change-in-production'); // 生產環境請更換
-define('JWT_EXPIRE_TIME', 24 * 60 * 60); // 24小時
+// JWT 設定
+if (!defined('JWT_SECRET')) {
+    define('JWT_SECRET', env('JWT_SECRET', 'change-me'));
+}
+if (!defined('JWT_EXPIRE_TIME')) {
+    define('JWT_EXPIRE_TIME', (int)env('JWT_EXPIRE_TIME', 24 * 60 * 60));
+}
 
-// 密碼加密配置
-define('PASSWORD_COST', 12);
+// 密碼雜湊設定
+if (!defined('PASSWORD_COST')) {
+    define('PASSWORD_COST', (int)env('PASSWORD_COST', 12));
+}
 
-// 分頁配置
-define('DEFAULT_PAGE_SIZE', 20);
-define('MAX_PAGE_SIZE', 100);
+// 分頁設定
+if (!defined('DEFAULT_PAGE_SIZE')) {
+    define('DEFAULT_PAGE_SIZE', (int)env('DEFAULT_PAGE_SIZE', 20));
+}
+if (!defined('MAX_PAGE_SIZE')) {
+    define('MAX_PAGE_SIZE', (int)env('MAX_PAGE_SIZE', 100));
+}
 
-// 圖片上傳配置
-define('ALLOWED_IMAGE_TYPES', ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-define('MAX_IMAGE_WIDTH', 1920);
-define('MAX_IMAGE_HEIGHT', 1080);
+// 圖片上傳設定
+if (!defined('ALLOWED_IMAGE_TYPES')) {
+    define('ALLOWED_IMAGE_TYPES', ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+}
+if (!defined('MAX_IMAGE_WIDTH')) {
+    define('MAX_IMAGE_WIDTH', (int)env('MAX_IMAGE_WIDTH', 1920));
+}
+if (!defined('MAX_IMAGE_HEIGHT')) {
+    define('MAX_IMAGE_HEIGHT', (int)env('MAX_IMAGE_HEIGHT', 1080));
+}
 
-// 系統狀態常數
+// 系統枚舉常數
 class UserRole {
     const ADMIN = 'admin';
     const VENDOR = 'vendor';
@@ -70,7 +104,7 @@ spl_autoload_register(function ($class_name) {
         'middleware/',
         'utils/'
     ];
-    
+
     foreach ($directories as $directory) {
         $file = __DIR__ . '/../' . $directory . $class_name . '.php';
         if (file_exists($file)) {
@@ -80,22 +114,23 @@ spl_autoload_register(function ($class_name) {
     }
 });
 
-// 載入資料庫配置
+// 載入資料庫設定
 require_once 'database.php';
 
-// CORS 設定 (如果需要前後端分離)
+// CORS 設定 (如需單獨部署前端)
 function setCorsHeaders() {
-    header('Access-Control-Allow-Origin: *');
+    $origin = env('CORS_ALLOW_ORIGIN', '*');
+    header('Access-Control-Allow-Origin: ' . $origin);
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
-    
+
     if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
         http_response_code(200);
         exit;
     }
 }
 
-// JSON 回應函數
+// JSON 輸出函數
 function jsonResponse($data, $status_code = 200) {
     http_response_code($status_code);
     header('Content-Type: application/json; charset=utf-8');
@@ -110,11 +145,11 @@ function errorResponse($message, $status_code = 400, $details = null) {
         'message' => $message,
         'timestamp' => date('Y-m-d H:i:s')
     ];
-    
+
     if ($details) {
         $response['details'] = $details;
     }
-    
+
     jsonResponse($response, $status_code);
 }
 
@@ -125,24 +160,24 @@ function successResponse($data = null, $message = 'success') {
         'message' => $message,
         'timestamp' => date('Y-m-d H:i:s')
     ];
-    
+
     if ($data !== null) {
         $response['data'] = $data;
     }
-    
+
     jsonResponse($response);
 }
 
-// 驗證必要目錄
+// 驗證必備資料夾
 function checkDirectories() {
     $directories = [
-        'uploads/',
-        'uploads/coupons/',
-        'uploads/avatars/',
-        'uploads/logos/',
+        UPLOAD_PATH,
+        UPLOAD_PATH . 'coupons/',
+        UPLOAD_PATH . 'avatars/',
+        UPLOAD_PATH . 'logos/',
         'logs/'
     ];
-    
+
     foreach ($directories as $dir) {
         if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
@@ -150,6 +185,6 @@ function checkDirectories() {
     }
 }
 
-// 初始化檢查
+// 啟動檢查
 checkDirectories();
 ?>

@@ -3,30 +3,30 @@
  * 匯入優惠券素材並分配給廠商
  */
 
+require_once __DIR__ . '/../config/Env.php';
+Env::load(__DIR__ . '/../.env');
 require_once __DIR__ . '/../config/config.php';
 
-// 設定 JSON 響應
 header('Content-Type: application/json; charset=utf-8');
 ob_clean();
 
 try {
-    // 資料庫連接
-    $pdo = new PDO("mysql:host=localhost;dbname=songhokang_db;charset=utf8mb4", 'root', '', [
+    $dsn = sprintf(
+        'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
+        env('DB_HOST', '127.0.0.1'),
+        env('DB_PORT', '3306'),
+        env('DB_NAME', 'songhokang_db')
+    );
+    $pdo = new PDO($dsn, env('DB_USER', 'root'), env('DB_PASS', ''), [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ]);
 
-    // 開始事務
     $pdo->beginTransaction();
 
-    // 獲取所有已核准的廠商
-    $vendorStmt = $pdo->prepare("
-        SELECT v.*, u.username, u.email 
-        FROM vendors v 
-        JOIN users u ON v.user_id = u.id 
-        WHERE v.verification_status = 'approved' 
-        ORDER BY v.id
-    ");
+    $vendorStmt = $pdo->prepare(
+        "SELECT v.*, u.username, u.email FROM vendors v JOIN users u ON v.user_id = u.id WHERE v.verification_status = 'approved' ORDER BY v.id"
+    );
     $vendorStmt->execute();
     $vendors = $vendorStmt->fetchAll();
 
@@ -34,10 +34,6 @@ try {
         throw new Exception('沒有找到已核准的廠商');
     }
 
-    // 輸出調試資訊
-    error_log("找到 " . count($vendors) . " 個已核准廠商");
-
-    // 優惠券類別定義
     $categories = [
         '美食餐飲' => ['餐廳', '小吃', '飲料', '甜點', '火鍋', '燒烤', '日式', '中式', '西式', '素食'],
         '購物時尚' => ['服飾', '鞋包', '配件', '化妝品', '香水', '珠寶', '手錶', '眼鏡'],
@@ -46,10 +42,8 @@ try {
         '3C電子' => ['手機', '電腦', '家電', '相機', '音響', '配件', '軟體', '遊戲']
     ];
 
-    // 優惠券標籤
     $tags = ['熱門', '限時', '新品', '獨家', '會員專屬', '滿額贈', '買一送一', '折扣', '免運', '現金回饋'];
 
-    // 優惠券模板數據
     $couponTemplates = [
         ['title' => '頂級牛排套餐', 'category' => '美食餐飲', 'discount_type' => 'percentage', 'discount_value' => 20],
         ['title' => '手沖咖啡買一送一', 'category' => '美食餐飲', 'discount_type' => 'bogo', 'discount_value' => 0],
@@ -75,77 +69,70 @@ try {
 
     $insertedCount = 0;
     $vendorIndex = 0;
-    $maxCouponsPerVendor = 5; // 每家廠商最多5個優惠券
-    $vendorCouponCounts = []; // 記錄每個廠商已分配的優惠券數量
+    $maxCouponsPerVendor = 5;
+    $vendorCouponCounts = [];
 
-    // 計算實際要處理的優惠券數量
     $totalCoupons = min(50, count($vendors) * $maxCouponsPerVendor);
-    
-    // 處理優惠券素材
+
     for ($i = 1; $i <= $totalCoupons; $i++) {
         $imageFileName = "送齁康文宣素材 ($i).jpg";
         $imagePath = "img/$imageFileName";
-        
-        // 檢查圖片檔案是否存在
+
         if (!file_exists(__DIR__ . "/../$imagePath")) {
             continue;
         }
 
-        // 選擇廠商（確保每家廠商不超過5個優惠券）
         $vendor = null;
         $attempts = 0;
         do {
             $currentVendor = $vendors[$vendorIndex % count($vendors)];
             $vendorId = $currentVendor['id'];
-            
+
             if (!isset($vendorCouponCounts[$vendorId])) {
                 $vendorCouponCounts[$vendorId] = 0;
             }
-            
+
             if ($vendorCouponCounts[$vendorId] < $maxCouponsPerVendor) {
                 $vendor = $currentVendor;
                 $vendorCouponCounts[$vendorId]++;
                 break;
             }
-            
+
             $vendorIndex++;
             $attempts++;
-            
-            // 防止無限循環
+
             if ($attempts >= count($vendors)) {
                 break;
             }
         } while (true);
-        
-        // 如果所有廠商都已達到上限，跳出循環
+
         if (!$vendor) {
             break;
         }
 
-        // 選擇優惠券模板（循環使用）
         $template = $couponTemplates[($i - 1) % count($couponTemplates)];
-        
-        // 隨機選擇標籤（1-3個）
         $selectedTags = array_slice($tags, 0, rand(1, 3));
         shuffle($selectedTags);
-        
-        // 計算價格
+
         $originalPrice = rand(200, 2000);
-        $discountedPrice = $template['discount_type'] === 'percentage' ? 
-            $originalPrice * (1 - $template['discount_value'] / 100) :
-            ($template['discount_type'] === 'fixed' ? 
-                max(0, $originalPrice - $template['discount_value']) : 
-                $originalPrice);
-        
-        // 生成優惠券數據
+        $discountedPrice = $template['discount_type'] === 'percentage'
+            ? $originalPrice * (1 - $template['discount_value'] / 100)
+            : ($template['discount_type'] === 'fixed'
+                ? max(0, $originalPrice - $template['discount_value'])
+                : $originalPrice);
+
         $couponData = [
-            'vendor_id' => $vendor['id'], // 使用 vendors 表的 id，不是 user_id
+            'vendor_id' => $vendor['id'],
             'title' => $template['title'] . ' - ' . $vendor['company_name'],
-            'description' => "由 {$vendor['company_name']} 提供的優質服務，" . 
-                           ($template['discount_type'] === 'percentage' ? "享受 {$template['discount_value']}% 折扣" :
-                            ($template['discount_type'] === 'fixed' ? "立即折抵 NT$ {$template['discount_value']}" :
-                             ($template['discount_type'] === 'bogo' ? "買一送一超值優惠" : "免費體驗活動"))),
-            'terms' => "1. 本優惠券僅限於 {$vendor['company_name']} 使用\n2. 不得與其他優惠併用\n3. 優惠券使用期限內有效\n4. 遺失恕不補發\n5. 詳細條款請洽詢店家",
+            'description' => "由 {$vendor['company_name']} 提供，" .
+                ($template['discount_type'] === 'percentage'
+                    ? "享受 {$template['discount_value']}% 折扣"
+                    : ($template['discount_type'] === 'fixed'
+                        ? "立即折抵 NT$ {$template['discount_value']}"
+                        : ($template['discount_type'] === 'bogo'
+                            ? "買一送一超值優惠"
+                            : "免費體驗活動"))),
+            'terms' => "1. 本優惠券僅限於 {$vendor['company_name']} 使用\n2. 不得與其他優惠併用\n3. 優惠券使用期限內有效\n4. 遺失恕不補發\n5. 詳細條款請向店家確認",
             'image' => $imagePath,
             'category' => $template['category'],
             'discount_type' => $template['discount_type'],
@@ -161,19 +148,18 @@ try {
             'favorite_count' => rand(0, 20),
             'status' => 'active',
             'approval_status' => 'approved',
-            'approved_by' => 1, // 假設管理員 ID 為 1
+            'approved_by' => 1,
             'approved_at' => date('Y-m-d H:i:s'),
             'featured' => rand(0, 1) ? 1 : 0,
             'priority' => rand(0, 10)
         ];
 
-        // 插入優惠券
-        $insertStmt = $pdo->prepare("
-            INSERT INTO coupons (
-                vendor_id, title, description, terms, image, category, discount_type, 
-                discount_value, original_price, discounted_price, start_date, end_date, 
-                usage_limit_per_user, total_usage_limit, used_count, view_count, 
-                favorite_count, status, approval_status, approved_by, approved_at, 
+        $insertStmt = $pdo->prepare(
+            "INSERT INTO coupons (
+                vendor_id, title, description, terms, image, category, discount_type,
+                discount_value, original_price, discounted_price, start_date, end_date,
+                usage_limit_per_user, total_usage_limit, used_count, view_count,
+                favorite_count, status, approval_status, approved_by, approved_at,
                 featured, priority, created_at, updated_at
             ) VALUES (
                 :vendor_id, :title, :description, :terms, :image, :category, :discount_type,
@@ -181,14 +167,13 @@ try {
                 :usage_limit_per_user, :total_usage_limit, :used_count, :view_count,
                 :favorite_count, :status, :approval_status, :approved_by, :approved_at,
                 :featured, :priority, NOW(), NOW()
-            )
-        ");
+            )"
+        );
 
         $insertStmt->execute($couponData);
         $insertedCount++;
     }
 
-    // 提交事務
     $pdo->commit();
 
     echo json_encode([
@@ -198,18 +183,17 @@ try {
             'inserted_count' => $insertedCount,
             'vendors_count' => count($vendors)
         ]
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
 
 } catch (Exception $e) {
-    // 回滾事務
-    if (isset($pdo)) {
+    if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollback();
     }
-    
+
     echo json_encode([
         'success' => false,
         'message' => '匯入失敗：' . $e->getMessage(),
         'error' => $e->getTraceAsString()
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
 }
 ?>

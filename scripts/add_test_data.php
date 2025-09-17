@@ -1,101 +1,88 @@
 <?php
 /**
- * 添加測試數據 - 用戶和廠商
+ * 添增測試資料 - 使用者與廠商帳號
  */
 
-// 直接連接數據庫
-$host = 'localhost';
-$dbname = 'songhokang_db';
-$username = 'root';
-$password = '';
+require_once __DIR__ . '/../config/Env.php';
+Env::load(__DIR__ . '/../.env');
+
+$host = env('DB_HOST', '127.0.0.1');
+$port = env('DB_PORT', '3306');
+$dbname = env('DB_NAME', 'songhokang_db');
+$username = env('DB_USER', 'root');
+$password = env('DB_PASS', '');
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+    $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $host, $port, $dbname);
+    $pdo = new PDO($dsn, $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    echo "<h2>添加測試數據</h2>";
-    
-    // 檢查是否已有數據
+
+    echo "<h2>添增測試資料</h2>";
+
+    // 檢查是否已存在資料
     $stmt = $pdo->query("SELECT COUNT(*) as count FROM users");
-    $userCount = $stmt->fetch()['count'];
-    
+    $userCount = (int)($stmt->fetch()['count'] ?? 0);
+
     if ($userCount > 0) {
-        echo "<p>數據庫中已有 $userCount 個用戶，跳過用戶創建</p>";
+        echo "<p>資料庫中已有 $userCount 筆使用者，略過建立使用者流程。</p>";
     } else {
-        // 創建管理員
-        echo "<h3>創建管理員用戶</h3>";
+        // 建立管理員
+        echo "<h3>建立管理員帳號</h3>";
         $adminPassword = password_hash('admin123', PASSWORD_DEFAULT);
         $stmt = $pdo->prepare("INSERT INTO users (username, email, password, role, status, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
         $stmt->execute(['admin', 'admin@songhokang.com', $adminPassword, 'admin', 'active']);
-        echo "<p>✅ 管理員用戶創建成功 (用戶名: admin, 密碼: admin123)</p>";
-        
-        // 創建測試一般用戶
-        echo "<h3>創建一般用戶</h3>";
+        echo "<p>新增管理員帳號 (admin / admin123)</p>";
+
+        // 建立一般使用者
+        echo "<h3>建立一般使用者</h3>";
         $generalUsers = [
-            ['張小明', 'zhang@example.com'],
-            ['李美華', 'li@example.com'],
-            ['王大偉', 'wang@example.com'],
-            ['陳小芳', 'chen@example.com'],
-            ['林志明', 'lin@example.com']
+            ['張小美', 'zhang@example.com'],
+            ['李小華', 'li@example.com'],
+            ['王大明', 'wang@example.com'],
+            ['陳雅琪', 'chen@example.com'],
+            ['林怡君', 'lin@example.com']
         ];
-        
+
         foreach ($generalUsers as $user) {
             $password = password_hash('123456', PASSWORD_DEFAULT);
             $stmt->execute([$user[0], $user[1], $password, 'customer', 'active']);
-            echo "<p>✅ 一般用戶: {$user[0]} ({$user[1]})</p>";
+            echo "<p>新增一般使用者：{$user[0]} ({$user[1]})</p>";
         }
-        
-        // 創建廠商用戶
-        echo "<h3>創建廠商用戶</h3>";
+
+        // 建立廠商使用者
+        echo "<h3>建立廠商使用者</h3>";
         $vendorUsers = [
-            ['美食天堂', 'meishi@example.com', '美食天堂股份有限公司', '02-12345678'],
-            ['時尚購物', 'fashion@example.com', '時尚購物有限公司', '02-23456789'],
-            ['健身中心', 'fitness@example.com', '健身中心企業社', '02-34567890'],
-            ['美容SPA', 'beauty@example.com', '美容SPA館', '02-45678901'],
-            ['3C電子', 'tech@example.com', '3C電子專賣店', '02-56789012']
+            ['美食天地', 'meishi@example.com', '美食天地股份有限公司', '02-12345678'],
+            ['流行購物', 'fashion@example.com', '流行購物事業有限公司', '02-23456789'],
+            ['健康健身', 'fitness@example.com', '健康健身事業', '02-34567890'],
+            ['美容SPA', 'beauty@example.com', '美容SPA企業', '02-45678901'],
+            ['3C市集', 'tech@example.com', '3C市集專賣店', '02-56789012']
         ];
-        
+
         foreach ($vendorUsers as $vendor) {
             $password = password_hash('vendor123', PASSWORD_DEFAULT);
             $stmt->execute([$vendor[0], $vendor[1], $password, 'vendor', 'active']);
             $vendorUserId = $pdo->lastInsertId();
-            
-            // 創建對應的廠商資料
+
             $stmt2 = $pdo->prepare("INSERT INTO vendors (user_id, company_name, phone, verification_status, created_at) VALUES (?, ?, ?, ?, NOW())");
             $stmt2->execute([$vendorUserId, $vendor[2], $vendor[3], 'approved']);
-            
-            echo "<p>✅ 廠商用戶: {$vendor[0]} - {$vendor[2]}</p>";
+
+            echo "<p>新增廠商帳號：{$vendor[0]} - {$vendor[2]}</p>";
         }
     }
-    
-    // 檢查優惠券數據
+
+    // 檢查優惠券資料
     $stmt = $pdo->query("SELECT COUNT(*) as count FROM coupons");
-    $couponCount = $stmt->fetch()['count'];
-    
+    $couponCount = (int)($stmt->fetch()['count'] ?? 0);
+
     if ($couponCount > 0) {
-        echo "<p>數據庫中已有 $couponCount 個優惠券</p>";
+        echo "<p>資料庫中已有 $couponCount 張優惠券。</p>";
     } else {
-        echo "<p>⚠️ 數據庫中沒有優惠券數據，請使用優惠券導入工具添加優惠券</p>";
-        echo "<p><a href='import_coupons_web.php' target='_blank'>點擊這裡導入優惠券</a></p>";
+        echo "<p>目前沒有優惠券資料，可使用 scripts/import_coupons.php 導入。</p>";
     }
-    
-    echo "<h3>數據統計</h3>";
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM users");
-    $userCount = $stmt->fetch()['count'];
-    echo "<p>總用戶數: $userCount</p>";
-    
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM vendors");
-    $vendorCount = $stmt->fetch()['count'];
-    echo "<p>總廠商數: $vendorCount</p>";
-    
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM coupons");
-    $couponCount = $stmt->fetch()['count'];
-    echo "<p>總優惠券數: $couponCount</p>";
-    
-    echo "<p><strong>測試數據添加完成！</strong></p>";
-    echo "<p><a href='../admin/index.html' target='_blank'>進入管理員後台測試</a></p>";
-    
+
+    echo "<p><strong>測試資料處理完成。</strong></p>";
+
 } catch (Exception $e) {
-    echo "<p style='color: red;'>錯誤: " . $e->getMessage() . "</p>";
+    echo "<p style='color: red;'>發生錯誤：" . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . "</p>";
 }
-?>
