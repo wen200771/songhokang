@@ -483,6 +483,68 @@ class CouponController {
 
         // 移動檔案
         if (move_uploaded_file($file['tmp_name'], $filepath)) {
+            // 縮圖：若超過上限，使用 GD 等比例縮小
+            try {
+                $imageInfo = getimagesize($filepath);
+                if ($imageInfo && isset($imageInfo[0], $imageInfo[1])) {
+                    $origW = (int)$imageInfo[0];
+                    $origH = (int)$imageInfo[1];
+                    $maxW = (int)MAX_IMAGE_WIDTH;
+                    $maxH = (int)MAX_IMAGE_HEIGHT;
+                    if ($origW > 0 && $origH > 0 && ($origW > $maxW || $origH > $maxH)) {
+                        $scale = min($maxW / $origW, $maxH / $origH);
+                        $newW = max(1, (int)floor($origW * $scale));
+                        $newH = max(1, (int)floor($origH * $scale));
+                        $extLower = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                        switch ($extLower) {
+                            case 'jpg':
+                            case 'jpeg':
+                                $src = imagecreatefromjpeg($filepath);
+                                break;
+                            case 'png':
+                                $src = imagecreatefrompng($filepath);
+                                break;
+                            case 'gif':
+                                $src = imagecreatefromgif($filepath);
+                                break;
+                            case 'webp':
+                                $src = function_exists('imagecreatefromwebp') ? imagecreatefromwebp($filepath) : null;
+                                break;
+                            default:
+                                $src = null;
+                        }
+                        if ($src) {
+                            $dst = imagecreatetruecolor($newW, $newH);
+                            if (in_array($extLower, ['png','gif','webp'])) {
+                                imagealphablending($dst, false);
+                                imagesavealpha($dst, true);
+                                $transparent = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+                                imagefilledrectangle($dst, 0, 0, $newW, $newH, $transparent);
+                            }
+                            imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+                            switch ($extLower) {
+                                case 'jpg':
+                                case 'jpeg':
+                                    imagejpeg($dst, $filepath, 85);
+                                    break;
+                                case 'png':
+                                    imagepng($dst, $filepath, 6);
+                                    break;
+                                case 'gif':
+                                    imagegif($dst, $filepath);
+                                    break;
+                                case 'webp':
+                                    if (function_exists('imagewebp')) imagewebp($dst, $filepath, 85);
+                                    break;
+                            }
+                            imagedestroy($dst);
+                            imagedestroy($src);
+                        }
+                    }
+                }
+            } catch (Throwable $t) {
+                // 忽略縮圖錯誤
+            }
             return rtrim(UPLOAD_PATH, '/') . '/coupons/' . $filename; // 返回統一路徑
         }
 

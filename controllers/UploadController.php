@@ -77,6 +77,77 @@ class UploadController {
             errorResponse('檔案儲存失敗', 500);
         }
 
+        // 若圖片超出尺寸，使用 GD 等比例縮小
+        try {
+            $imageInfo = getimagesize($targetPath);
+            if ($imageInfo && isset($imageInfo[0], $imageInfo[1])) {
+                $origW = (int)$imageInfo[0];
+                $origH = (int)$imageInfo[1];
+                $maxW = (int)MAX_IMAGE_WIDTH;
+                $maxH = (int)MAX_IMAGE_HEIGHT;
+                if ($origW > 0 && $origH > 0 && ($origW > $maxW || $origH > $maxH)) {
+                    $scale = min($maxW / $origW, $maxH / $origH);
+                    $newW = max(1, (int)floor($origW * $scale));
+                    $newH = max(1, (int)floor($origH * $scale));
+
+                    switch ($ext) {
+                        case 'jpg':
+                        case 'jpeg':
+                            $src = imagecreatefromjpeg($targetPath);
+                            break;
+                        case 'png':
+                            $src = imagecreatefrompng($targetPath);
+                            break;
+                        case 'gif':
+                            $src = imagecreatefromgif($targetPath);
+                            break;
+                        case 'webp':
+                            if (function_exists('imagecreatefromwebp')) {
+                                $src = imagecreatefromwebp($targetPath);
+                            } else {
+                                $src = null;
+                            }
+                            break;
+                        default:
+                            $src = null;
+                    }
+
+                    if ($src) {
+                        $dst = imagecreatetruecolor($newW, $newH);
+                        // 保留透明度（PNG/GIF）
+                        if (in_array($ext, ['png','gif','webp'])) {
+                            imagealphablending($dst, false);
+                            imagesavealpha($dst, true);
+                            $transparent = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+                            imagefilledrectangle($dst, 0, 0, $newW, $newH, $transparent);
+                        }
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+                        switch ($ext) {
+                            case 'jpg':
+                            case 'jpeg':
+                                imagejpeg($dst, $targetPath, 85);
+                                break;
+                            case 'png':
+                                imagepng($dst, $targetPath, 6);
+                                break;
+                            case 'gif':
+                                imagegif($dst, $targetPath);
+                                break;
+                            case 'webp':
+                                if (function_exists('imagewebp')) {
+                                    imagewebp($dst, $targetPath, 85);
+                                }
+                                break;
+                        }
+                        imagedestroy($dst);
+                        imagedestroy($src);
+                    }
+                }
+            }
+        } catch (Throwable $t) {
+            // 忽略縮圖失敗，保留原檔
+        }
+
         // 產生可供前端使用的相對 URL（以 /uploads/ 為起點）
         $publicUrl = '/' . trim(UPLOAD_PATH, '/') . '/' . $subdir . '/' . $filename;
 

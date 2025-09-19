@@ -145,7 +145,7 @@ function jsonResponse($data, $status_code = 200) {
 }
 
 // 錯誤回應函數
-function errorResponse($message, $status_code = 400, $details = null) {
+function errorResponse($message, $status_code = 400, $details = null, $error_code = null) {
     $response = [
         'success' => false,
         'message' => $message,
@@ -154,6 +154,10 @@ function errorResponse($message, $status_code = 400, $details = null) {
 
     if ($details) {
         $response['details'] = $details;
+    }
+
+    if ($error_code !== null) {
+        $response['code'] = $error_code;
     }
 
     jsonResponse($response, $status_code);
