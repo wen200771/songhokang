@@ -219,4 +219,30 @@ INSERT INTO `system_settings` (`setting_key`, `setting_value`, `setting_type`, `
 ('coupon_auto_approve', '0', 'boolean', '優惠券是否自動審核'),
 ('vendor_auto_approve', '0', 'boolean', '廠商是否自動審核');
 
+-- 建議索引（可重複執行，存在則略過由 DBA 覆核）
+-- Users
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users (username);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users (email);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users (role);
+CREATE INDEX IF NOT EXISTS idx_users_status ON users (status);
+
+-- Vendors
+CREATE INDEX IF NOT EXISTS idx_vendors_user_id ON vendors (user_id);
+CREATE INDEX IF NOT EXISTS idx_vendors_status ON vendors (verification_status);
+
+-- Coupons
+CREATE INDEX IF NOT EXISTS idx_coupons_status ON coupons (status);
+CREATE INDEX IF NOT EXISTS idx_coupons_category ON coupons (category);
+CREATE INDEX IF NOT EXISTS idx_coupons_vendor ON coupons (vendor_id);
+CREATE INDEX IF NOT EXISTS idx_coupons_expiry ON coupons (end_date);
+
+-- Favorites
+CREATE UNIQUE INDEX IF NOT EXISTS idx_favorites_user_coupon ON user_favorites (user_id, coupon_id);
+CREATE INDEX IF NOT EXISTS idx_favorites_user ON user_favorites (user_id);
+
+-- Coupon usage
+CREATE INDEX IF NOT EXISTS idx_coupon_usage_coupon ON coupon_usage (coupon_id);
+CREATE INDEX IF NOT EXISTS idx_coupon_usage_user ON coupon_usage (user_id);
+CREATE INDEX IF NOT EXISTS idx_coupon_usage_verified ON coupon_usage (verified_at);
+
 SET FOREIGN_KEY_CHECKS = 1;

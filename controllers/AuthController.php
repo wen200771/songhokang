@@ -17,6 +17,8 @@ class AuthController {
     public function middleware() {
         // 依方法指定需要認證的動作
         return [
+            'login' => ['RateLimit'],
+            'register' => ['RateLimit'],
             'logout' => ['Auth'],
             'me' => ['Auth'],
             'profile' => ['Auth'],
@@ -75,6 +77,11 @@ class AuthController {
         // 移除敏感資訊
         unset($user['password']);
         
+        // 稽核
+        if (class_exists('Audit')) {
+            Audit::log('auth.login.success', ['user_id' => $user['id']]);
+        }
+
         successResponse([
             'user' => $user,
             'token' => $token,
@@ -134,6 +141,11 @@ class AuthController {
             $this->createVendorProfile($userId, $input);
         }
         
+        // 稽核
+        if (class_exists('Audit')) {
+            Audit::log('auth.register.success', ['user_id' => $userId, 'role' => $userData['role']]);
+        }
+
         successResponse([
             'user_id' => $userId,
             'status' => $userData['status']
@@ -145,7 +157,10 @@ class AuthController {
      */
     public function logout() {
         // JWT 是無狀態的，客戶端刪除 token 即可
-        // 這裡可以記錄登出日誌
+        if (class_exists('Audit')) {
+            $u = $GLOBALS['current_user'] ?? null;
+            Audit::log('auth.logout', ['user' => $u]);
+        }
         successResponse(null, '登出成功');
     }
     
@@ -367,6 +382,13 @@ class AuthController {
         // 移除敏感資訊
         unset($targetUser['password']);
         
+        if (class_exists('Audit')) {
+            Audit::log('admin.switchAccount', [
+                'admin_user_id' => $currentUser['user_id'],
+                'target_user_id' => $targetUser['id']
+            ]);
+        }
+
         successResponse([
             'user' => $targetUser,
             'token' => $token,
@@ -420,6 +442,12 @@ class AuthController {
         // 移除敏感資訊
         unset($adminUser['password']);
         
+        if (class_exists('Audit')) {
+            Audit::log('admin.switchBack', [
+                'admin_user_id' => $adminUser['id']
+            ]);
+        }
+
         successResponse([
             'user' => $adminUser,
             'token' => $token,

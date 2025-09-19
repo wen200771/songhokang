@@ -16,10 +16,43 @@ DirectoryIndex index.html
 AddType application/json .json
 
 # 允許跨域請求（開發環境）
-Header always set Access-Control-Allow-Origin "*"
-Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+# 建議在生產環境改為指定網域，例如：
+#   Header always set Access-Control-Allow-Origin "https://your-domain.com"
+#   Header always set Vary "Origin"
+#Header always set Access-Control-Allow-Origin "*"
+#Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+#Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+
+# 安全標頭（建議保留）
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "no-referrer-when-downgrade"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header always set Cross-Origin-Resource-Policy "same-origin"
+    Header always set Cross-Origin-Opener-Policy "same-origin"
+    # 若全站已啟用 HTTPS，可取消下一行註解
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+</IfModule>
 
 # 處理預檢請求
 RewriteCond %{REQUEST_METHOD} OPTIONS
 RewriteRule ^(.*)$ $1 [R=200,L]
+
+# 壓縮（如伺服器支援）
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# 快取控制
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+  ExpiresByType image/webp "access plus 30 days"
+  ExpiresByType image/jpeg "access plus 30 days"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/gif "access plus 30 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresDefault "access plus 1 day"
+</IfModule>

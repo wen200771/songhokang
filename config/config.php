@@ -134,6 +134,12 @@ function setCorsHeaders() {
 function jsonResponse($data, $status_code = 200) {
     http_response_code($status_code);
     header('Content-Type: application/json; charset=utf-8');
+	// 確保每個回應都有請求 ID，便於追蹤
+	$requestId = $_SERVER['HTTP_X_REQUEST_ID'] ?? bin2hex(random_bytes(8));
+	header('X-Request-ID: ' . $requestId);
+	if (is_array($data)) {
+		$data['request_id'] = $data['request_id'] ?? $requestId;
+	}
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     exit;
 }

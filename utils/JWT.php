@@ -60,17 +60,41 @@ class JWT {
      * 從 HTTP 請求頭獲取 Token
      */
     public static function getTokenFromHeader() {
-        $headers = getallheaders();
-        
-        if (isset($headers['Authorization'])) {
-            $authHeader = $headers['Authorization'];
-            if (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
-                return $matches[1];
-            }
-        }
-        
-        return null;
-    }
+		$authHeader = null;
+		// 常見環境：getallheaders
+		if (function_exists('getallheaders')) {
+			$headers = getallheaders();
+			if (isset($headers['Authorization'])) {
+				$authHeader = $headers['Authorization'];
+			} elseif (isset($headers['authorization'])) {
+				$authHeader = $headers['authorization'];
+			}
+		}
+		// Fallback: $_SERVER 超全域
+		if ($authHeader === null) {
+			if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
+				$authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+			} elseif (!empty($_SERVER['Authorization'])) {
+				$authHeader = $_SERVER['Authorization'];
+			}
+		}
+		// Fallback: apache_request_headers（某些環境可用）
+		if ($authHeader === null && function_exists('apache_request_headers')) {
+			$headers = apache_request_headers();
+			if (isset($headers['Authorization'])) {
+				$authHeader = $headers['Authorization'];
+			} elseif (isset($headers['authorization'])) {
+				$authHeader = $headers['authorization'];
+			}
+		}
+		if (is_string($authHeader)) {
+			$authHeader = trim($authHeader);
+			if (preg_match('/^Bearer\s+(.*)$/i', $authHeader, $matches)) {
+				return trim($matches[1]);
+			}
+		}
+		return null;
+ 	}
     
     /**
      * 生成用戶 Token

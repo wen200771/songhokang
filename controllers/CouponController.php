@@ -20,6 +20,8 @@ class CouponController {
             'delete' => ['Auth'],
             'updateStatus' => ['Auth', 'Admin'],
             'addNote' => ['Auth', 'Admin'],
+            'use' => ['Auth', 'RateLimit'],
+            'verify' => ['RateLimit'],
         ];
     }
 
@@ -362,6 +364,13 @@ class CouponController {
             // 生成QR Code URL
             $qrCodeURL = QRCode::generateCouponVoucher($id, $currentUser['user_id'], $verificationCode);
             
+            if (class_exists('Audit')) {
+                Audit::log('coupon.use', [
+                    'coupon_id' => (int)$id,
+                    'user_id' => (int)$currentUser['user_id']
+                ]);
+            }
+
             successResponse([
                 'message' => '優惠券使用成功',
                 'coupon_id' => $id,
@@ -423,6 +432,13 @@ class CouponController {
             $userModel = new User();
             $user = $userModel->findById($usage['user_id']);
             
+            if (class_exists('Audit')) {
+                Audit::log('coupon.verify', [
+                    'usage_id' => (int)$usage['id'],
+                    'coupon_id' => (int)$usage['coupon_id']
+                ]);
+            }
+
             successResponse([
                 'message' => '憑證驗證成功',
                 'coupon' => $coupon,
@@ -455,9 +471,9 @@ class CouponController {
         }
 
         // 創建上傳目錄
-        $uploadDir = '../uploads/coupons/';
+        $uploadDir = __DIR__ . '/../' . rtrim(UPLOAD_PATH, '/') . '/coupons/';
         if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
+            mkdir($uploadDir, 0755, true);
         }
 
         // 生成唯一檔名
@@ -467,7 +483,7 @@ class CouponController {
 
         // 移動檔案
         if (move_uploaded_file($file['tmp_name'], $filepath)) {
-            return 'uploads/coupons/' . $filename; // 返回相對路徑
+            return rtrim(UPLOAD_PATH, '/') . '/coupons/' . $filename; // 返回統一路徑
         }
 
         return false;

@@ -8,7 +8,7 @@
 class UploadController {
     public function middleware() {
         return [
-            'image' => ['Auth']
+            'image' => ['Auth', 'RateLimit']
         ];
     }
 
@@ -63,7 +63,7 @@ class UploadController {
 
         // 目的資料夾
         $subdir = $type === 'avatar' ? 'avatars' : ($type === 'logo' ? 'logos' : 'coupons');
-        $targetDir = __DIR__ . '/../api/uploads/' . $subdir . '/';
+        $targetDir = __DIR__ . '/../' . rtrim(UPLOAD_PATH, '/') . '/' . $subdir . '/';
         if (!is_dir($targetDir)) {
             mkdir($targetDir, 0755, true);
         }
@@ -77,8 +77,16 @@ class UploadController {
             errorResponse('檔案儲存失敗', 500);
         }
 
-        // 產生可供前端使用的相對 URL（以 /api/ 為起點）
-        $publicUrl = '/api/uploads/' . $subdir . '/' . $filename;
+        // 產生可供前端使用的相對 URL（以 /uploads/ 為起點）
+        $publicUrl = '/' . trim(UPLOAD_PATH, '/') . '/' . $subdir . '/' . $filename;
+
+        if (class_exists('Audit')) {
+            Audit::log('upload.image', [
+                'type' => $type,
+                'size' => (int)$file['size'],
+                'mime' => $mime,
+            ]);
+        }
 
         successResponse([
             'url' => $publicUrl,

@@ -210,7 +210,7 @@ try {
     
     // 路由匹配
     $handler = matchRoute($method, $path, $routes);
-    
+
     if ($handler === null) {
         // 調試信息
         error_log("Route not found: $method $path");
@@ -219,8 +219,17 @@ try {
         $routeList = implode(', ', array_slice($availableRoutes, 0, 10));
         errorResponse("路由不存在: $method $path。可用路由: $routeList", 404);
     }
-    
-    // 執行控制器
+
+    // 設定目前路由資訊供中間件/稽核使用
+    if (is_array($handler)) {
+        list($controllerAction,) = $handler;
+    } else {
+        $controllerAction = $handler;
+    }
+    $GLOBALS['current_route'] = $controllerAction;
+    $GLOBALS['current_method'] = $method;
+    $GLOBALS['current_path'] = $path;
+
     executeController($handler);
     
 } catch (Exception $e) {

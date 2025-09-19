@@ -21,7 +21,8 @@
     <meta name="twitter:description" content="精選各類熱門優惠，支援搜尋、分類與收藏。">
     <meta name="twitter:image" content="http://localhost:8000/img/送齁康文宣素材 (1).jpg">
     <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎟️</text></svg>">
+        href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiByeD0iMTAiIGZpbGw9IiNGQ0EzMTEiLz4KPHRleHQgeD0iNTAiIHk9IjU1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzAiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+U0g8L3RleHQ+Cjwvc3ZnPg==">
+    <link rel="preload" href="css/main.css" as="style">
     <link rel="stylesheet" href="css/main.css">
 </head>
 
@@ -34,7 +35,8 @@
                 <div class="search-icon">🔍</div>
                 <div class="search-input-wrapper" id="searchWrapper">
                     <div class="selected-tags" id="selectedTags"></div>
-                    <input type="text" class="search-box" placeholder="搜尋優惠券、店家或分類..." id="searchInput">
+                    <input type="text" class="search-box" placeholder="搜尋優惠券、店家或分類..." id="searchInput"
+                        aria-label="搜尋優惠券、店家或分類" autocomplete="on">
                 </div>
                 <button class="filter-toggle-btn" id="filterToggleBtn" title="進階篩選">⚙️</button>
                 <div class="search-dropdown" id="searchDropdown">
@@ -212,8 +214,8 @@
             <div class="modal-left">
                 <picture id="modalPicture">
                     <source id="modalSourceWebp" type="image/webp">
-                    <img src="" alt="優惠券" class="modal-image" id="modalImage" width="900" height="1200"
-                        decoding="async">
+                    <img src="" alt="優惠券" class="modal-image" id="modalImage" width="900" height="1200" decoding="async"
+                        loading="lazy">
                 </picture>
             </div>
             <div class="modal-right">
@@ -273,27 +275,35 @@
                 <form id="loginForm" style="display:block;">
                     <div style="display:flex; flex-direction:column; gap:10px;">
                         <input id="loginUsername" type="text" placeholder="用戶名或Email"
-                            style="padding:10px; border-radius:10px; border:1px solid #ddd;">
+                            style="padding:10px; border-radius:10px; border:1px solid #ddd;" aria-label="用戶名或Email"
+                            autocomplete="username">
                         <input id="loginPassword" type="password" placeholder="密碼"
-                            style="padding:10px; border-radius:10px; border:1px solid #ddd;">
+                            style="padding:10px; border-radius:10px; border:1px solid #ddd;" aria-label="密碼"
+                            autocomplete="current-password">
                         <button type="submit" class="btn-primary">登入</button>
                     </div>
                 </form>
                 <form id="registerForm" style="display:none;">
                     <div style="display:flex; flex-direction:column; gap:10px;">
                         <input id="regUsername" type="text" placeholder="用戶名"
-                            style="padding:10px; border-radius:10px; border:1px solid #ddd;">
+                            style="padding:10px; border-radius:10px; border:1px solid #ddd;" aria-label="用戶名"
+                            autocomplete="username">
                         <input id="regEmail" type="email" placeholder="Email"
-                            style="padding:10px; border-radius:10px; border:1px solid #ddd;">
+                            style="padding:10px; border-radius:10px; border:1px solid #ddd;" aria-label="Email"
+                            autocomplete="email">
                         <input id="regPassword" type="password" placeholder="密碼(≥6位)"
-                            style="padding:10px; border-radius:10px; border:1px solid #ddd;">
+                            style="padding:10px; border-radius:10px; border:1px solid #ddd;" aria-label="密碼"
+                            autocomplete="new-password">
                         <input id="regPassword2" type="password" placeholder="確認密碼"
-                            style="padding:10px; border-radius:10px; border:1px solid #ddd;">
+                            style="padding:10px; border-radius:10px; border:1px solid #ddd;" aria-label="確認密碼"
+                            autocomplete="new-password">
                         <input id="regPhone" type="text" placeholder="手機(選填)"
-                            style="padding:10px; border-radius:10px; border:1px solid #ddd;">
+                            style="padding:10px; border-radius:10px; border:1px solid #ddd;" aria-label="手機"
+                            autocomplete="tel">
                         <div id="vendorFields" style="display:none;">
                             <input id="regCompany" type="text" placeholder="公司名稱(廠商必填)"
-                                style="padding:10px; border-radius:10px; border:1px solid #ddd; margin-top:6px;">
+                                style="padding:10px; border-radius:10px; border:1px solid #ddd; margin-top:6px;"
+                                aria-label="公司名稱" autocomplete="organization">
                         </div>
                         <button type="submit" class="btn-primary">建立帳號</button>
                     </div>
