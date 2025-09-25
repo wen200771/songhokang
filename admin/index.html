@@ -101,6 +101,7 @@
             font-weight: 500;
             transition: all 0.3s ease;
             cursor: pointer;
+            font-size: 16px;
         }
 
         .nav-link:hover {
@@ -1663,6 +1664,7 @@
                         <span>系統設定</span>
                     </a>
                 </li>
+
             </ul>
         </div>
 
@@ -1691,6 +1693,8 @@
                         </div>
                     </div>
                 </div>
+
+
 
                 <!-- 用戶管理 -->
                 <div class="section" id="users-section">
@@ -2304,10 +2308,6 @@
 
                 <!-- 內容管理 -->
                 <div class="section" id="content-section">
-                    <div class="section-header">
-                        <h2>📝 內容管理</h2>
-                        <p>管理網站內容、公告、輪播圖和幫助文檔</p>
-                    </div>
 
                     <!-- 網站公告管理 -->
                     <div class="card">
@@ -2438,10 +2438,6 @@
 
                 <!-- 安全管理 -->
                 <div class="section" id="security-section">
-                    <div class="section-header">
-                        <h2>🛡️ 安全管理</h2>
-                        <p>系統安全監控、登入日誌和訪問控制</p>
-                    </div>
 
                     <!-- 登入日誌 -->
                     <div class="card">
@@ -2589,10 +2585,6 @@
 
                 <!-- 通知管理 -->
                 <div class="section" id="notifications-section">
-                    <div class="section-header">
-                        <h2>🔔 通知管理</h2>
-                        <p>管理系統通知、郵件模板和推送設定</p>
-                    </div>
 
                     <!-- 即時通知 -->
                     <div class="card">
@@ -2776,19 +2768,11 @@
 
                 <!-- 外觀設定 -->
                 <div class="section" id="appearance-section">
-                    <div class="section-header">
-                        <h2>🎨 外觀設定</h2>
-                        <p>自定義網站外觀、主題和品牌元素</p>
-                    </div>
+                    <!-- 移除頁面標題（依需求不顯示頁內大標題） -->
 
-                    <!-- 主題設定 -->
+                    <!-- 主題設定（移除卡片抬頭） -->
                     <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <span>🌓</span>
-                                <span>主題設定</span>
-                            </div>
-                        </div>
+
                         <div class="card-body">
                             <div class="theme-options">
                                 <div class="theme-option active" onclick="selectTheme('light')">
@@ -2825,14 +2809,9 @@
                         </div>
                     </div>
 
-                    <!-- Logo 管理 -->
+                    <!-- Logo 管理（移除卡片抬頭） -->
                     <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <span>🖼️</span>
-                                <span>Logo 管理</span>
-                            </div>
-                        </div>
+
                         <div class="card-body">
                             <div class="logo-management">
                                 <div class="logo-upload-section">
@@ -2877,14 +2856,9 @@
                         </div>
                     </div>
 
-                    <!-- 色彩方案 -->
+                    <!-- 色彩方案（移除卡片抬頭） -->
                     <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <span>🎨</span>
-                                <span>色彩方案</span>
-                            </div>
-                        </div>
+
                         <div class="card-body">
                             <div class="color-scheme-settings">
                                 <div class="color-setting">
@@ -3150,6 +3124,15 @@
                 };
             }
 
+            // 路徑工具：將相對圖片路徑轉成可在 /admin/ 下正確顯示
+            function resolveImageUrl(url) {
+                if (!url) return '';
+                if (url.startsWith('http') || url.startsWith('data:')) return url;
+                if (url.startsWith('/')) return url; // 例如 /uploads/...
+                // 將 img/... 這類路徑轉為 ../img/...，使其從網站根目錄載入
+                return '../' + url.replace(/^\.\//, '');
+            }
+
             // 權限檢查
             async function checkAuth() {
                 try {
@@ -3186,20 +3169,23 @@
             }
 
             // 導航功能
-            function showSection(sectionName) {
+            async function showSection(sectionName) {
+                if (!sectionName) return; // 避免空值
+                const target = document.getElementById(`${sectionName}-section`);
+                if (!target) return; // 找不到對應區塊則不處理
+
                 // 隱藏所有區段
                 document.querySelectorAll('.section').forEach(section => {
                     section.classList.remove('active');
                 });
 
                 // 顯示指定區段
-                document.getElementById(`${sectionName}-section`).classList.add('active');
+                target.classList.add('active');
 
-                // 更新導航狀態
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('active');
+                // 更新導航狀態（僅針對具 data-section 的項目）
+                document.querySelectorAll('.nav-link[data-section]').forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('data-section') === sectionName);
                 });
-                document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
 
                 currentSection = sectionName;
 
@@ -3220,6 +3206,13 @@
                             break;
                         case 'analytics':
                             loadAnalytics();
+                            break;
+                        case 'meta':
+                            // 初次切換時載入基礎清單
+                            if (!window.__metaLoaded) {
+                                await loadMetaBaseInline();
+                                window.__metaLoaded = true;
+                            }
                             break;
                         case 'content':
                             loadContentManagement();
@@ -3597,11 +3590,16 @@
                 <tr>
                     <td style="font-weight: 600; font-size: 14px; text-align: center;">${coupon.id || (index + 1)}</td>
                     <td>
+                        <div style="display:flex; gap:12px; align-items:flex-start;">
+                            ${coupon.image ? `<img src="${resolveImageUrl(coupon.image)}" alt="thumb" style="width:64px;height:64px;object-fit:cover;border-radius:8px;flex:0 0 auto;">` : ''}
+                            <div style="min-width:0;">
                         <div style="font-weight: 600; margin-bottom: 4px; font-size: 15px; line-height: 1.4; color: #1f2937;">
                             ${coupon.title || '未設定標題'}
                         </div>
                         <div style="font-size: 13px; color: #6b7280; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                             ${coupon.description || '無描述'}
+                                </div>
+                            </div>
                         </div>
                     </td>
                     <td style="font-size: 14px; color: #f97316; font-weight: 600;">${coupon.company_name || '未知廠商'}</td>
@@ -3639,6 +3637,12 @@
                             </button>
                             <button class="btn" onclick="editCoupon(${coupon.id || index})" style="padding: 4px 8px; font-size: 11px; background: #fbbf24; color: white;">
                                 ✏️
+                            </button>
+                            <button class="btn" onclick="openTagDrawer(${coupon.id || index})" title="標籤" style="padding: 4px 8px; font-size: 11px; background: #10b981; color: white;">
+                                🏷️
+                            </button>
+                            <button class="btn" onclick="openRegionDrawer(${coupon.id || index})" title="地區" style="padding: 4px 8px; font-size: 11px; background: #2563eb; color: white;">
+                                📍
                             </button>
                             <button class="btn" onclick="deleteCoupon(${coupon.id || index})" style="padding: 4px 8px; font-size: 11px; background: #ef4444; color: white;">
                                 🗑️
@@ -4024,13 +4028,13 @@
                 <div style="background: white; border-radius: 20px; padding: 32px; max-width: 700px; width: 100%; max-height: 80vh; overflow-y: auto;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                         <h2 style="margin: 0; color: #1f2937;">🎫 優惠券詳情</h2>
-                        <button onclick="this.closest('[style*=\"position: fixed\"]').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280;">×</button>
+                        <button type="button" class="js-close-preview" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280;">×</button>
                     </div>
                     
                     <div style="display: grid; gap: 16px;">
                         ${coupon.image ? `
                             <div style="text-align: center; margin-bottom: 16px;">
-                                <img src="${coupon.image}" style="max-width: 300px; max-height: 200px; object-fit: cover; border-radius: 12px;">
+                                <img src="${resolveImageUrl(coupon.image)}" style="max-width: 300px; max-height: 200px; object-fit: cover; border-radius: 12px;">
                             </div>
                         ` : ''}
                         
@@ -4078,7 +4082,7 @@
                     </div>
 
                     <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
-                        <button class="btn secondary" onclick="this.closest('[style*=\"position: fixed\"]').remove()">關閉</button>
+                        <button type="button" class="btn secondary js-close-preview">關閉</button>
                         ${coupon.status === 'pending' ? `
                             <button class="btn primary" onclick="approveCoupon(${coupon.id}); this.closest('[style*=\"position: fixed\"]').remove();">✅ 核准</button>
                             <button class="btn danger" onclick="rejectCoupon(${coupon.id}); this.closest('[style*=\"position: fixed\"]').remove();">❌ 駁回</button>
@@ -4094,6 +4098,15 @@
                 });
 
                 document.body.appendChild(modal);
+
+                // 綁定關閉事件（避免 inline JS 造成解析問題）
+                const bindClose = () => { try { modal.remove(); } catch (e) { /* ignore */ } };
+                modal.querySelectorAll('.js-close-preview').forEach(btn => {
+                    btn.addEventListener('click', bindClose);
+                });
+                // Esc 關閉
+                const onKey = (ev) => { if (ev.key === 'Escape') { bindClose(); document.removeEventListener('keydown', onKey); } };
+                document.addEventListener('keydown', onKey);
             }
 
             // 編輯優惠券
@@ -4168,6 +4181,22 @@
                                         </select>
                                     </div>
                                 </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">優惠類型</label>
+                                        <select id="editDiscountType" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px;">
+                                            <option value="percentage" ${coupon.discount_type === 'percentage' ? 'selected' : ''}>百分比折扣</option>
+                                            <option value="fixed" ${coupon.discount_type === 'fixed' ? 'selected' : ''}>固定金額</option>
+                                            <option value="bogo" ${coupon.discount_type === 'bogo' ? 'selected' : ''}>買一送一</option>
+                                            <option value="free" ${coupon.discount_type === 'free' ? 'selected' : ''}>免費</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">優惠值</label>
+                                        <input type="number" id="editDiscountValue" step="0.01" value="${(coupon.discount_value ?? '')}" placeholder="依類型填百分比或金額，買一送一/免費可留空或 0" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px;" />
+                                    </div>
+                                </div>
                                 
                                 <div>
                                     <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">描述</label>
@@ -4205,7 +4234,9 @@
                         status: document.getElementById('editStatus').value,
                         description: document.getElementById('editDescription').value,
                         start_date: document.getElementById('editStartDate').value,
-                        end_date: document.getElementById('editEndDate').value
+                        end_date: document.getElementById('editEndDate').value,
+                        discount_type: document.getElementById('editDiscountType').value,
+                        discount_value: document.getElementById('editDiscountValue').value
                     };
 
                     try {
@@ -4218,17 +4249,15 @@
                             body: JSON.stringify(formData)
                         });
 
-                        if (response.ok) {
-                            const data = await response.json();
-                            if (data.success) {
-                                alert('✅ 優惠券更新成功！');
-                                modal.remove();
-                                loadCoupons(); // 重新載入列表
-                            } else {
-                                alert('❌ 更新失敗：' + (data.message || '未知錯誤'));
-                            }
+                        const data = await response.json().catch(() => ({}));
+                        if (response.ok && data && data.success) {
+                            alert('✅ 優惠券更新成功！');
+                            modal.remove();
+                            loadCoupons();
                         } else {
-                            alert('❌ 更新失敗：HTTP ' + response.status);
+                            const msg = (data && data.message) ? data.message : ('HTTP ' + response.status);
+                            const details = (data && data.details) ? ('\n' + JSON.stringify(data.details)) : '';
+                            alert('❌ 更新失敗：' + msg + details);
                         }
                     } catch (error) {
                         console.error('更新優惠券失敗:', error);
@@ -7195,9 +7224,14 @@
                     // 設置導航
                     document.querySelectorAll('.nav-link').forEach(link => {
                         link.addEventListener('click', (e) => {
-                            e.preventDefault();
                             const section = link.getAttribute('data-section');
-                            showSection(section);
+                            if (section) {
+                                e.preventDefault();
+                                showSection(section);
+                            } else {
+                                // 非內嵌分頁（例如外連管理頁），讓預設行為生效
+                                // 若 target="_blank" 會自動新開分頁
+                            }
                         });
                     });
 
@@ -7259,6 +7293,159 @@
                 }
 
                 console.log('佈局修復完成');
+            }
+
+            // ---- API helpers ----
+            async function apiGet(url) {
+                const r = await fetch(url, { headers: getAuthHeaders() });
+                try { return await r.json(); } catch { return {}; }
+            }
+            async function apiPut(url, body) {
+                const r = await fetch(url, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(body || {}) });
+                try { return await r.json(); } catch { return {}; }
+            }
+
+            // ---- 右側抽屜：行內快速編輯 ----
+            function ensureSideDrawer() {
+                if (document.getElementById('sideDrawer')) return;
+                const drawer = document.createElement('div');
+                drawer.id = 'sideDrawer';
+                drawer.style.cssText = `position:fixed;top:0;right:0;bottom:0;width:380px;background:#fff;border-left:1px solid #e5e7eb;box-shadow:-8px 0 24px rgba(0,0,0,.08);transform:translateX(100%);transition:transform .25s ease;z-index:10000;display:flex;flex-direction:column;`;
+                drawer.innerHTML = `
+                    <div style="padding:14px 16px;border-bottom:1px solid #f3f4f6;display:flex;justify-content:space-between;align-items:center;">
+                        <div id="drawerTitle" style="font-weight:700;">快速編輯</div>
+                        <button onclick="closeDrawer()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6b7280;">×</button>
+                    </div>
+                    <div id="drawerBody" style="padding:14px 16px;overflow-y:auto;"></div>
+                    <div style="padding:12px 16px;border-top:1px solid #f3f4f6;display:flex;gap:8px;justify-content:flex-end;">
+                        <button class="btn secondary" onclick="closeDrawer()">取消</button>
+                        <button class="btn primary" id="drawerSaveBtn">儲存</button>
+                    </div>`;
+                document.body.appendChild(drawer);
+            }
+            function openDrawer(title, bodyHtml, onSave) {
+                ensureSideDrawer();
+                document.getElementById('drawerTitle').textContent = title || '快速編輯';
+                document.getElementById('drawerBody').innerHTML = bodyHtml || '';
+                const btn = document.getElementById('drawerSaveBtn');
+                btn.onclick = onSave || null;
+                document.getElementById('sideDrawer').style.transform = 'translateX(0)';
+            }
+            function closeDrawer() { const d = document.getElementById('sideDrawer'); if (d) d.style.transform = 'translateX(100%)'; }
+
+            async function openTagDrawer(couponId) {
+                const tags = await apiGet('../api/tags?active=1');
+                const all = Array.isArray(tags?.data) ? tags.data : (tags?.data?.items || []);
+                const current = await apiGet(`../api/coupons/${couponId}/tags`);
+                const selected = new Set(((current?.data) || []).map(x => (x.slug || '').toLowerCase()));
+                const body = `<div style=\"margin-bottom:8px;color:#6b7280;\">優惠券 #${couponId}</div><div style=\"display:flex;flex-wrap:wrap;gap:8px;\">${all.map(t => `<label class=\\"chip\\"><input type=\\"checkbox\\" name=\\"drawer_tag\\" value=\\"${t.slug}\\" ${selected.has((t.slug || '').toLowerCase()) ? 'checked' : ''}><span>${t.icon || ''}</span>${t.name}</label>`).join('')}</div>`;
+                openDrawer('設定標籤', body, async () => {
+                    const tag_slugs = Array.from(document.querySelectorAll('input[name="drawer_tag"]:checked')).map(cb => cb.value);
+                    const res = await apiPut(`../api/coupons/${couponId}/tags`, { tag_slugs });
+                    closeDrawer();
+                    showSuccessMessage(res?.message || '標籤已保存');
+                });
+            }
+            async function openRegionDrawer(couponId) {
+                const regions = await apiGet('../api/regions?active=1');
+                const all = (Array.isArray(regions?.data) ? regions.data : (regions?.data?.items || [])).filter(r => (r.level || 1) === 1);
+                const current = await apiGet(`../api/coupons/${couponId}/regions`);
+                const selected = new Set(((current?.data) || []).map(x => (x.slug || '').toLowerCase()));
+                const body = `<div style=\"margin-bottom:8px;color:#6b7280;\">優惠券 #${couponId}</div><div style=\"display:flex;flex-wrap:wrap;gap:8px;\">${all.map(r => `<label class=\\"chip\\"><input type=\\"checkbox\\" name=\\"drawer_region\\" value=\\"${r.slug}\\" ${selected.has((r.slug || '').toLowerCase()) ? 'checked' : ''}><span>📍</span>${r.name}</label>`).join('')}</div>`;
+                openDrawer('設定地區', body, async () => {
+                    const region_slugs = Array.from(document.querySelectorAll('input[name="drawer_region"]:checked')).map(cb => cb.value);
+                    const res = await apiPut(`../api/coupons/${couponId}/regions`, { region_slugs });
+                    closeDrawer();
+                    showSuccessMessage(res?.message || '地區已保存');
+                });
+            }
+            // === 覆寫：抽屜改用 checkbox DOM 方式繪製 ===
+            function renderChips(container, items, selectedSet, name, prefixIcon) {
+                container.innerHTML = '';
+                items.forEach(function (it) {
+                    var lab = document.createElement('label');
+                    lab.className = 'chip';
+                    lab.style.cssText = 'border:1px solid #d1d5db;padding:6px 10px;border-radius:14px;display:inline-flex;align-items:center;gap:6px;';
+                    var cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.name = name;
+                    cb.value = it.slug;
+                    cb.checked = selectedSet.has((it.slug || '').toLowerCase());
+                    lab.appendChild(cb);
+                    var span = document.createElement('span');
+                    span.textContent = (prefixIcon ? (prefixIcon + ' ') : '') + (it.icon ? (it.icon + ' ') : '') + (it.name || '');
+                    lab.appendChild(span);
+                    container.appendChild(lab);
+                });
+            }
+
+            async function openTagDrawer(couponId) {
+                try {
+                    ensureSideDrawer();
+                    document.getElementById('drawerTitle').textContent = '設定標籤';
+                    var bodyEl = document.getElementById('drawerBody');
+                    bodyEl.innerHTML = '';
+                    var header = document.createElement('div');
+                    header.style.cssText = 'margin-bottom:8px;color:#6b7280;';
+                    header.textContent = '優惠券 #' + couponId;
+                    bodyEl.appendChild(header);
+                    var chips = document.createElement('div');
+                    chips.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;';
+                    bodyEl.appendChild(chips);
+
+                    var tags = await apiGet('../api/tags?active=1');
+                    var all = Array.isArray(tags && tags.data) ? tags.data : ((tags && tags.data && tags.data.items) || []);
+                    var current = await apiGet('../api/coupons/' + couponId + '/tags');
+                    var selected = new Set(((current && current.data) || []).map(function (x) { return (x.slug || '').toLowerCase(); }));
+
+                    renderChips(chips, all, selected, 'drawer_tag', '');
+
+                    var saveBtn = document.getElementById('drawerSaveBtn');
+                    saveBtn.onclick = async function () {
+                        var tag_slugs = Array.from(document.querySelectorAll('input[name="drawer_tag"]:checked')).map(function (cb) { return cb.value; });
+                        var res = await apiPut('../api/coupons/' + couponId + '/tags', { tag_slugs: tag_slugs });
+                        closeDrawer();
+                        showSuccessMessage((res && res.message) || '標籤已保存');
+                    };
+                    document.getElementById('sideDrawer').style.transform = 'translateX(0)';
+                } catch (e) {
+                    console.error('openTagDrawer error:', e);
+                }
+            }
+
+            async function openRegionDrawer(couponId) {
+                try {
+                    ensureSideDrawer();
+                    document.getElementById('drawerTitle').textContent = '設定地區';
+                    var bodyEl = document.getElementById('drawerBody');
+                    bodyEl.innerHTML = '';
+                    var header = document.createElement('div');
+                    header.style.cssText = 'margin-bottom:8px;color:#6b7280;';
+                    header.textContent = '優惠券 #' + couponId;
+                    bodyEl.appendChild(header);
+                    var chips = document.createElement('div');
+                    chips.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;';
+                    bodyEl.appendChild(chips);
+
+                    var regions = await apiGet('../api/regions?active=1');
+                    var all = Array.isArray(regions && regions.data) ? regions.data : ((regions && regions.data && regions.data.items) || []);
+                    all = all.filter(function (r) { return (r.level || 1) === 1; });
+                    var current = await apiGet('../api/coupons/' + couponId + '/regions');
+                    var selected = new Set(((current && current.data) || []).map(function (x) { return (x.slug || '').toLowerCase(); }));
+
+                    renderChips(chips, all, selected, 'drawer_region', '📍');
+
+                    var saveBtn = document.getElementById('drawerSaveBtn');
+                    saveBtn.onclick = async function () {
+                        var region_slugs = Array.from(document.querySelectorAll('input[name="drawer_region"]:checked')).map(function (cb) { return cb.value; });
+                        var res = await apiPut('../api/coupons/' + couponId + '/regions', { region_slugs: region_slugs });
+                        closeDrawer();
+                        showSuccessMessage((res && res.message) || '地區已保存');
+                    };
+                    document.getElementById('sideDrawer').style.transform = 'translateX(0)';
+                } catch (e) {
+                    console.error('openRegionDrawer error:', e);
+                }
             }
         </script>
 

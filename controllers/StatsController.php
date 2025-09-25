@@ -418,5 +418,100 @@ class StatsController {
             errorResponse('載入核銷記錄失敗', 500);
         }
     }
+
+    /**
+     * POST /qa/report 收前端 QA 檢測報告並寫檔，方便遠端查看
+     */
+    public function qaReport() {
+        try {
+            $input = file_get_contents('php://input');
+            $data = json_decode($input, true);
+            if (!$data) {
+                errorResponse('無效的 JSON', 400);
+            }
+            $dir = __DIR__ . '/../logs/qa';
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0777, true);
+            }
+            $ts = date('Ymd_His');
+            $file = $dir . "/qa_{$ts}.json";
+            file_put_contents($file, json_encode($data, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT));
+            successResponse(['file' => basename($file)], 'QA 報告已儲存');
+        } catch (Exception $e) {
+            error_log('寫入 QA 報告失敗: ' . $e->getMessage());
+            errorResponse('寫入失敗', 500);
+        }
+    }
+
+    // 取得最新 QA 報告（TEST_MODE 才可用）
+    public function qaReportLatest() {
+        if (!env_bool('TEST_MODE', true)) {
+            errorResponse('未啟用測試模式', 403);
+        }
+        $dir = __DIR__ . '/../logs/qa';
+        if (!is_dir($dir)) {
+            successResponse(['items' => []], '尚無報告');
+            return;
+        }
+        $files = glob($dir . '/qa_*.json');
+        if (!$files) {
+            successResponse(['items' => []], '尚無報告');
+            return;
+        }
+        rsort($files);
+        $latest = $files[0];
+        $json = @file_get_contents($latest) ?: '{}';
+        header('Content-Type: application/json; charset=utf-8');
+        echo $json;
+    }
+
+    // 重置測試資料（TEST_MODE 才可用）：清空測試帳號與相關資料，並重建基礎資料
+    public function qaReset() {
+        if (!env_bool('TEST_MODE', true)) {
+            errorResponse('未啟用測試模式', 403);
+        }
+        try {
+            // 測試帳號與資料標識
+            $testUsername = env('TEST_USER', 'qa_user');
+            $testEmail = env('TEST_EMAIL', 'qa_user@example.com');
+
+            // 刪除舊的測試用收藏、使用記錄（僅限測試帳號範圍）
+            $userId = null;
+            $stmt = $this->conn->prepare('SELECT id FROM users WHERE username = ? OR email = ?');
+            $stmt->execute([$testUsername, $testEmail]);
+            if ($row = $stmt->fetch()) { $userId = (int)$row['id']; }
+
+            if ($userId) {
+                $this->conn->prepare('DELETE FROM favorites WHERE user_id = ?')->execute([$userId]);
+                $this->conn->prepare('DELETE FROM coupon_usage WHERE user_id = ?')->execute([$userId]);
+            }
+
+            // 建立或更新測試帳號（customer 角色）
+            if (!$userId) {
+                $this->conn->prepare('INSERT INTO users (username, email, password, role, status, created_at) VALUES (?, ?, ?, "customer", "active", NOW())')
+                    ->execute([$testUsername, $testEmail, password_hash('p@ssw0rd', PASSWORD_BCRYPT)]);
+                $userId = (int)$this->conn->lastInsertId();
+            }
+
+            // 確保最基本的 tags/regions 存在（若不存在就插入）
+            $this->conn->exec("INSERT IGNORE INTO tags (slug, name, type, active) VALUES
+                ('hot','熱門','quick',1),('new','新上架','quick',1)");
+            $this->conn->exec("INSERT IGNORE INTO regions (slug, name, level, active) VALUES
+                ('taipei','台北市',1,1),('new-taipei','新北市',1,1)");
+
+            // 建立少量測試優惠券（若不存在）
+            $this->conn->exec("INSERT INTO coupons (title, category, description, discount_type, discount_value, status, view_count, favorite_count, used_count, created_at)
+                SELECT 'QA 範例券 A','美食餐飲','自動化測試','percentage',20,'active',50,5,1,NOW()
+                WHERE NOT EXISTS (SELECT 1 FROM coupons WHERE title='QA 範例券 A');");
+            $this->conn->exec("INSERT INTO coupons (title, category, description, discount_type, discount_value, status, view_count, favorite_count, used_count, created_at)
+                SELECT 'QA 範例券 B','購物商城','自動化測試','amount',100,'active',120,10,3,NOW()
+                WHERE NOT EXISTS (SELECT 1 FROM coupons WHERE title='QA 範例券 B');");
+
+            successResponse(['user_id' => $userId], '測試資料已重置');
+        } catch (Exception $e) {
+            error_log('QA reset 失敗: ' . $e->getMessage());
+            errorResponse('重置失敗', 500);
+        }
+    }
 }
 ?>

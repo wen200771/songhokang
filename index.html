@@ -81,6 +81,18 @@
                             <div class="filter-options" id="categoryFilters"></div>
                         </div>
 
+                        <!-- 快速篩選（標籤） -->
+                        <div class="filter-group">
+                            <label class="filter-label">快速篩選</label>
+                            <div class="filter-options" id="quickFilters"></div>
+                        </div>
+
+                        <!-- 地區 -->
+                        <div class="filter-group">
+                            <label class="filter-label">地區</label>
+                            <div class="filter-options" id="regionFilters"></div>
+                        </div>
+
                         <!-- 到期時間 -->
                         <div class="filter-group">
                             <label class="filter-label">到期時間</label>
@@ -202,8 +214,85 @@
 
     <!-- 主要內容 -->
     <main class="main-content">
-        <div class="masonry-container" id="masonryContainer">
-            <!-- 優惠券卡片將由 JavaScript 動態生成 -->
+        <!-- 智能推薦區塊 -->
+        <div class="recommendation-section" id="recommendationSection">
+            <!-- 分類導航 -->
+            <div class="category-nav-container">
+                <div class="category-nav" id="categoryNav">
+                    <div class="category-item active" data-category="all">
+                        <span class="category-icon">🎯</span>
+                        <span class="category-text">全部</span>
+                    </div>
+                    <div class="category-item" data-category="熱門">
+                        <span class="category-icon">🔥</span>
+                        <span class="category-text">熱門</span>
+                    </div>
+                    <div class="category-item" data-category="即將到期">
+                        <span class="category-icon">⏰</span>
+                        <span class="category-text">即將到期</span>
+                    </div>
+                    <div class="category-item" data-category="新上架">
+                        <span class="category-icon">✨</span>
+                        <span class="category-text">新上架</span>
+                    </div>
+                    <div class="category-item" data-category="美食餐飲">
+                        <span class="category-icon">🍽️</span>
+                        <span class="category-text">美食</span>
+                    </div>
+                    <div class="category-item" data-category="購物商城">
+                        <span class="category-icon">🛍️</span>
+                        <span class="category-text">購物</span>
+                    </div>
+                    <div class="category-item" data-category="美容保養">
+                        <span class="category-icon">💄</span>
+                        <span class="category-text">美容</span>
+                    </div>
+                    <div class="category-item" data-category="休閒娛樂">
+                        <span class="category-icon">🎮</span>
+                        <span class="category-text">娛樂</span>
+                    </div>
+                    <div class="category-item" data-category="旅遊住宿">
+                        <span class="category-icon">✈️</span>
+                        <span class="category-text">旅遊</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 推薦標題區 -->
+            <div class="recommendation-header" id="recommendationHeader">
+                <h2 class="recommendation-title">🎯 為您推薦</h2>
+                <p class="recommendation-subtitle">根據您的瀏覽偏好精選優惠</p>
+            </div>
+
+            <!-- 特色推薦卡片（輪播） -->
+            <div class="featured-section" id="featuredSection">
+                <button class="carousel-btn prev" id="carouselPrev">‹</button>
+                <div class="featured-container" id="featuredContainer">
+                    <!-- 將由 JavaScript 動態生成 -->
+                </div>
+                <button class="carousel-btn next" id="carouselNext">›</button>
+            </div>
+            <div class="carousel-indicators" id="carouselIndicators">
+                <!-- 指示點將由 JavaScript 動態生成 -->
+            </div>
+        </div>
+
+        <!-- 主要內容區 -->
+        <div class="main-section">
+            <div class="section-header">
+                <h3 class="section-title" id="mainSectionTitle">所有優惠</h3>
+                <div class="view-toggle" id="viewToggle">
+                    <button class="view-btn active" data-view="grid">
+                        <span>⊞</span>
+                    </button>
+                    <button class="view-btn" data-view="list">
+                        <span>☰</span>
+                    </button>
+                </div>
+            </div>
+            <div class="masonry-container" id="masonryContainer">
+                <!-- 優惠券卡片將由 JavaScript 動態生成 -->
+            </div>
         </div>
     </main>
 

@@ -169,7 +169,7 @@ function buildDummyCoupons() {
 // 從 API 載入資料
 async function loadCouponsFromApi() {
     try {
-        const res = await fetch("api/coupons?page=1&pageSize=50");
+        const res = await fetch("api/coupons/advanced?page=1&pageSize=50");
         const json = await res.json();
         const items = json?.data?.coupons || [];
         if (Array.isArray(items) && items.length > 0) {
@@ -187,14 +187,28 @@ async function loadCouponsFromApi() {
                 usage: item.usage || "每人限用一次",
                 address: item.address || "",
                 phone: item.phone || "",
+                view_count: item.view_count || Math.floor(Math.random() * 1000), // 模擬瀏覽數
+                discount_value:
+                    item.discount_value || Math.floor(Math.random() * 50) + 10,
+                discount_type:
+                    item.discount_type ||
+                    (Math.random() > 0.5 ? "percentage" : "fixed"),
+                created_at:
+                    item.created_at ||
+                    new Date(
+                        Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
+                    ).toISOString(),
             }));
+            renderFeaturedCoupons();
             renderCoupons(coupons);
         } else {
             buildDummyCoupons();
+            renderFeaturedCoupons();
             renderCoupons(coupons);
         }
     } catch (e) {
         buildDummyCoupons();
+        renderFeaturedCoupons();
         renderCoupons(coupons);
     }
 }
@@ -273,6 +287,400 @@ async function loadCategories() {
     } catch (e) {
         // 靜默失敗即可，仍可用預設假資料
     }
+}
+
+// 載入快速標籤與地區，渲染到進階篩選
+async function loadTagsAndRegions() {
+    try {
+        // 讀取快速標籤（顯示所有後端啟用中的 quick 類別）
+        const tagRes = await fetch("api/tags?active=1");
+        const tagJson = await tagRes.json();
+        const tags = (
+            Array.isArray(tagJson?.data)
+                ? tagJson.data
+                : tagJson?.data?.items || []
+        )
+            .filter((t) => (t.type || "quick") === "quick")
+            .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+        const quickFilters = document.getElementById("quickFilters");
+        if (quickFilters) {
+            quickFilters.innerHTML = tags
+                .map(
+                    (t) => `
+                <label class="filter-chip">
+                    <input type="checkbox" value="${t.slug}" aria-label="${
+                        t.name
+                    }">
+                    <span>${t.icon || ""}</span>
+                    <span>${t.name}</span>
+                </label>
+            `
+                )
+                .join("");
+        }
+
+        // 讀取地區（僅顯示第一層：縣市）
+        const regionRes = await fetch("api/regions?active=1");
+        const regionJson = await regionRes.json();
+        const regions = (
+            Array.isArray(regionJson?.data)
+                ? regionJson.data
+                : regionJson?.data?.items || []
+        ).filter((r) => (r.level || 1) === 1);
+
+        const regionFilters = document.getElementById("regionFilters");
+        if (regionFilters) {
+            regionFilters.innerHTML = regions
+                .map(
+                    (r) => `
+                <label class="filter-chip">
+                    <input type="checkbox" value="${r.slug}" data-name="${r.name}" aria-label="${r.name}">
+                    <span>📍</span>
+                    <span>${r.name}</span>
+                </label>
+            `
+                )
+                .join("");
+        }
+    } catch (e) {
+        // 靜默失敗即可
+    }
+}
+
+// 輪播相關變數
+let currentSlide = 0;
+let carouselInterval = null;
+let carouselCoupons = [];
+
+// 渲染特色推薦卡片（輪播版本）
+function renderFeaturedCoupons() {
+    const container = document.getElementById("featuredContainer");
+    if (!container) return;
+
+    // 智能推薦算法：基於瀏覽記錄、收藏偏好和熱門度
+    const recommendations = getSmartRecommendations();
+    carouselCoupons = recommendations.slice(0, 12); // 增加到12張以支持輪播
+
+    container.innerHTML = carouselCoupons
+        .map((coupon) => {
+            const discount = getDiscountDisplay(coupon);
+            const expiry = getExpiryDisplay(coupon);
+            const webp = coupon.image.replace(/\.jpg$/i, ".webp");
+
+            return `
+            <div class="featured-card" data-id="${coupon.id}" onclick="openModal(coupons.find(c => c.id === ${coupon.id}))">
+                <picture>
+                    <source srcset="${webp}" type="image/webp">
+                    <img src="${coupon.image}" alt="${coupon.title}" class="featured-card-image" loading="lazy">
+                </picture>
+                <div class="featured-card-content">
+                    <h4 class="featured-card-title">${coupon.title}</h4>
+                    <div class="featured-card-info">
+                        <span class="featured-card-category">${coupon.category}</span>
+                        <span class="featured-card-discount">${discount}</span>
+                    </div>
+                    <div class="featured-card-expiry">
+                        <span>⏰</span>
+                        <span>${expiry}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        })
+        .join("");
+
+    // 初始化輪播
+    initCarousel();
+}
+
+// 計算每頁顯示的卡片數量（響應式）
+function getCardsPerSlide() {
+    const width = window.innerWidth;
+    if (width < 600) return 1; // 手機：1張
+    if (width < 900) return 2; // 平板：2張
+    if (width < 1200) return 3; // 小桌面：3張
+    return 4; // 大桌面：4張
+}
+
+// 初始化輪播功能
+function initCarousel() {
+    const cardsPerSlide = getCardsPerSlide();
+
+    if (carouselCoupons.length <= cardsPerSlide) {
+        // 如果卡片數量少於等於每頁顯示數，隱藏控制元素
+        document.getElementById("carouselPrev").style.display = "none";
+        document.getElementById("carouselNext").style.display = "none";
+        document.getElementById("carouselIndicators").style.display = "none";
+        return;
+    }
+
+    // 顯示控制元素
+    document.getElementById("carouselPrev").style.display = "flex";
+    document.getElementById("carouselNext").style.display = "flex";
+    document.getElementById("carouselIndicators").style.display = "flex";
+
+    // 計算總頁數
+    const totalSlides = Math.ceil(carouselCoupons.length / cardsPerSlide);
+
+    // 生成指示點
+    const indicators = document.getElementById("carouselIndicators");
+    indicators.innerHTML = Array(totalSlides)
+        .fill(0)
+        .map(
+            (_, i) =>
+                `<div class="carousel-dot ${
+                    i === 0 ? "active" : ""
+                }" data-slide="${i}"></div>`
+        )
+        .join("");
+
+    // 重置到第一頁
+    currentSlide = 0;
+    updateCarousel();
+
+    // 綁定事件
+    document.getElementById("carouselPrev").onclick = prevSlide;
+    document.getElementById("carouselNext").onclick = nextSlide;
+
+    // 指示點點擊事件
+    document.querySelectorAll(".carousel-dot").forEach((dot) => {
+        dot.onclick = () => goToSlide(parseInt(dot.dataset.slide));
+    });
+
+    // 自動播放
+    startCarousel();
+
+    // 滑鼠懸停時暫停自動播放
+    const featuredSection = document.getElementById("featuredSection");
+    featuredSection.onmouseenter = stopCarousel;
+    featuredSection.onmouseleave = startCarousel;
+
+    // 觸控滑動手勢
+    const container = document.getElementById("featuredContainer");
+    let touchStartX = 0;
+    let touchDeltaX = 0;
+    let touching = false;
+
+    const onTouchStart = (e) => {
+        if (!e.touches || e.touches.length === 0) return;
+        touching = true;
+        stopCarousel();
+        touchStartX = e.touches[0].clientX;
+        touchDeltaX = 0;
+    };
+    const onTouchMove = (e) => {
+        if (!touching || !e.touches || e.touches.length === 0) return;
+        touchDeltaX = e.touches[0].clientX - touchStartX;
+    };
+    const onTouchEnd = () => {
+        if (!touching) return;
+        touching = false;
+        // 閾值：滑動超過 60px 才觸發切換
+        if (Math.abs(touchDeltaX) > 60) {
+            if (touchDeltaX < 0) nextSlide();
+            else prevSlide();
+        }
+        // 恢復自動輪播
+        startCarousel();
+    };
+
+    container.addEventListener("touchstart", onTouchStart, { passive: true });
+    container.addEventListener("touchmove", onTouchMove, { passive: true });
+    container.addEventListener("touchend", onTouchEnd, { passive: true });
+}
+
+// 更新輪播位置
+function updateCarousel() {
+    const container = document.getElementById("featuredContainer");
+    const cardsPerSlide = getCardsPerSlide();
+
+    // 根據螢幕尺寸調整卡片寬度
+    let cardWidth = 280 + 16; // 預設桌面版
+    if (window.innerWidth < 600) cardWidth = 240 + 16; // 手機版
+
+    const offset = currentSlide * cardWidth * cardsPerSlide;
+    container.style.transform = `translateX(-${offset}px)`;
+
+    // 更新指示點
+    document.querySelectorAll(".carousel-dot").forEach((dot, index) => {
+        dot.classList.toggle("active", index === currentSlide);
+    });
+}
+
+// 下一張
+function nextSlide() {
+    const cardsPerSlide = getCardsPerSlide();
+    const totalSlides = Math.ceil(carouselCoupons.length / cardsPerSlide);
+    currentSlide = (currentSlide + 1) % totalSlides;
+    updateCarousel();
+}
+
+// 上一張
+function prevSlide() {
+    const cardsPerSlide = getCardsPerSlide();
+    const totalSlides = Math.ceil(carouselCoupons.length / cardsPerSlide);
+    currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+    updateCarousel();
+}
+
+// 跳到指定頁
+function goToSlide(slideIndex) {
+    currentSlide = slideIndex;
+    updateCarousel();
+}
+
+// 開始自動播放
+function startCarousel() {
+    if (carouselInterval) clearInterval(carouselInterval);
+    carouselInterval = setInterval(nextSlide, 5000); // 5秒切換一次
+}
+
+// 停止自動播放
+function stopCarousel() {
+    if (carouselInterval) {
+        clearInterval(carouselInterval);
+        carouselInterval = null;
+    }
+}
+
+// 視窗大小改變時重新初始化輪播
+window.addEventListener("resize", () => {
+    if (carouselCoupons.length > 0) {
+        // 停止當前輪播
+        stopCarousel();
+        // 重新初始化
+        setTimeout(() => initCarousel(), 100);
+    }
+});
+
+// 智能推薦算法
+function getSmartRecommendations() {
+    let recommendations = [...coupons];
+    const historyIds = getHistory().map((h) => h.id || h);
+    const favoriteIds = getFavorites();
+    const userCategories = getUserPreferredCategories();
+
+    // 評分系統
+    recommendations = recommendations.map((coupon) => {
+        let score = 0;
+
+        // 基礎熱門度 (30%)
+        score += (coupon.view_count || 0) * 0.0003;
+
+        // 用戶偏好分類 (40%)
+        if (userCategories.includes(coupon.category)) {
+            score += 40;
+        }
+
+        // 已收藏加分 (20%)
+        if (favoriteIds.includes(coupon.id)) {
+            score += 20;
+        }
+
+        // 最近瀏覽過類似的 (10%)
+        const recentSimilar = historyIds.slice(0, 5).some((historyId) => {
+            const historyCoupon = coupons.find((c) => c.id === historyId);
+            return historyCoupon && historyCoupon.category === coupon.category;
+        });
+        if (recentSimilar) score += 10;
+
+        // 即將到期的優惠加分
+        if (isExpiringSoon(coupon)) {
+            score += 15;
+        }
+
+        // 新上架的優惠加分
+        if (isNewCoupon(coupon)) {
+            score += 10;
+        }
+
+        return { ...coupon, recommendScore: score };
+    });
+
+    // 排序並取前8個
+    return recommendations
+        .sort((a, b) => b.recommendScore - a.recommendScore)
+        .slice(0, 8);
+}
+
+// 獲取用戶偏好分類
+function getUserPreferredCategories() {
+    const historyIds = getHistory()
+        .map((h) => h.id || h)
+        .slice(0, 20);
+    const favoriteIds = getFavorites();
+    const allIds = [...new Set([...historyIds, ...favoriteIds])];
+
+    const categoryCount = {};
+    allIds.forEach((id) => {
+        const coupon = coupons.find((c) => c.id === id);
+        if (coupon && coupon.category) {
+            categoryCount[coupon.category] =
+                (categoryCount[coupon.category] || 0) + 1;
+        }
+    });
+
+    return Object.entries(categoryCount)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([category]) => category);
+}
+
+// 檢查是否即將到期
+function isExpiringSoon(coupon, days = 7) {
+    if (!coupon.expiry) return false;
+    const expiryDate = new Date(coupon.expiry.replace(/\//g, "-"));
+    const now = new Date();
+    const diffTime = expiryDate - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 && diffDays <= days;
+}
+
+// 檢查是否為新優惠
+function isNewCoupon(coupon, days = 7) {
+    if (!coupon.created_at) return false;
+    const createdDate = new Date(coupon.created_at);
+    const now = new Date();
+    const diffTime = now - createdDate;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= days;
+}
+
+// 獲取折扣顯示文字
+function getDiscountDisplay(coupon) {
+    if (!coupon.discount_value) return "特價優惠";
+
+    switch (coupon.discount_type) {
+        case "percentage":
+            return `${coupon.discount_value}% OFF`;
+        case "fixed":
+            return `省 $${coupon.discount_value}`;
+        case "bogo":
+            return "買一送一";
+        case "free":
+            return "免費體驗";
+        default:
+            return `${coupon.discount_value}% OFF`;
+    }
+}
+
+// 獲取到期時間顯示
+function getExpiryDisplay(coupon) {
+    if (!coupon.expiry) return "長期有效";
+
+    const expiryDate = new Date(coupon.expiry.replace(/\//g, "-"));
+    const now = new Date();
+    const diffTime = expiryDate - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return "已過期";
+    if (diffDays === 0) return "今日到期";
+    if (diffDays === 1) return "明日到期";
+    if (diffDays <= 7) return `${diffDays}天後到期`;
+    if (diffDays <= 30) return `${Math.ceil(diffDays / 7)}週後到期`;
+
+    return expiryDate.toLocaleDateString("zh-TW");
 }
 
 // 渲染優惠券卡片 - Pinterest 風格
@@ -397,8 +805,8 @@ function addHistoryClearButton() {
     clearButton.id = "historyClearButton";
     clearButton.style.cssText = `
                 position: fixed;
-                top: 120px;
                 right: 24px;
+                bottom: 24px;
                 z-index: 1000;
                 background: rgba(220, 38, 38, 0.9);
                 backdrop-filter: blur(10px);
@@ -442,6 +850,14 @@ function addHistoryClearButton() {
     });
 
     document.body.appendChild(clearButton);
+
+    // 行動裝置優化：縮小邊距
+    if (window.innerWidth < 768) {
+        clearButton.style.right = "16px";
+        clearButton.style.bottom = "16px";
+        clearButton.style.padding = "10px 16px";
+        clearButton.style.fontSize = "13px";
+    }
 }
 
 // 清除所有瀏覽記錄
@@ -938,12 +1354,14 @@ async function performSearch() {
     if (searchTerm !== "") {
         try {
             const res = await fetch(
-                `api/coupons?search=${encodeURIComponent(
+                `api/coupons/advanced?search=${encodeURIComponent(
                     searchTerm
                 )}&page=1&pageSize=50`
             );
             const json = await res.json();
-            const items = json?.data?.coupons || [];
+            const items = Array.isArray(json?.data)
+                ? json.data
+                : json?.data?.coupons || json?.data?.items || [];
 
             if (Array.isArray(items) && items.length > 0) {
                 // 轉換API資料格式
@@ -1034,9 +1452,174 @@ function filterByCategory(category) {
     updateSidebarSelection(category);
 }
 
+// 處理分類導航
+function handleCategoryNavigation(category) {
+    const titleElement = document.getElementById("mainSectionTitle");
+    const headerElement = document.getElementById("recommendationHeader");
+    // 確保在分類瀏覽時顯示推薦區塊（僅限首頁情境）
+    setRecommendationVisibility(true);
+
+    let filteredCoupons = [];
+    let titleText = "";
+    let headerTitle = "";
+    let headerSubtitle = "";
+
+    switch (category) {
+        case "all":
+            filteredCoupons = coupons;
+            titleText = "所有優惠";
+            headerTitle = "🎯 為您推薦";
+            headerSubtitle = "根據您的瀏覽偏好精選優惠";
+            break;
+
+        case "熱門":
+            filteredCoupons = [...coupons].sort(
+                (a, b) => (b.view_count || 0) - (a.view_count || 0)
+            );
+            titleText = "熱門優惠";
+            headerTitle = "🔥 熱門精選";
+            headerSubtitle = "最受歡迎的優惠券";
+            break;
+
+        case "即將到期":
+            filteredCoupons = coupons.filter((coupon) =>
+                isExpiringSoon(coupon)
+            );
+            titleText = "即將到期";
+            headerTitle = "⏰ 即將到期";
+            headerSubtitle = "把握最後機會，立即使用";
+            break;
+
+        case "新上架":
+            filteredCoupons = coupons.filter((coupon) => isNewCoupon(coupon));
+            titleText = "新上架";
+            headerTitle = "✨ 最新優惠";
+            headerSubtitle = "剛上架的新鮮優惠";
+            break;
+
+        default:
+            // 特定分類
+            filteredCoupons = coupons.filter(
+                (coupon) => coupon.category === category
+            );
+            titleText = category;
+            headerTitle = `🎯 ${category}`;
+            headerSubtitle = `精選${category}優惠`;
+            break;
+    }
+
+    // 更新標題
+    if (titleElement) titleElement.textContent = titleText;
+    if (headerElement) {
+        headerElement.querySelector(".recommendation-title").textContent =
+            headerTitle;
+        headerElement.querySelector(".recommendation-subtitle").textContent =
+            headerSubtitle;
+    }
+
+    // 重新渲染推薦卡片（針對該分類的推薦）
+    renderCategoryFeatured(category);
+
+    // 渲染主要內容
+    renderCoupons(filteredCoupons);
+
+    // 顯示結果訊息
+    // 類別切換只更新內容，不提示
+}
+
+// 渲染分類專屬的推薦
+function renderCategoryFeatured(category) {
+    const container = document.getElementById("featuredContainer");
+    if (!container) return;
+
+    let featuredCoupons = [];
+
+    if (category === "all") {
+        featuredCoupons = getSmartRecommendations();
+    } else if (category === "熱門") {
+        featuredCoupons = [...coupons]
+            .sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
+            .slice(0, 8);
+    } else if (category === "即將到期") {
+        featuredCoupons = coupons
+            .filter((coupon) => isExpiringSoon(coupon))
+            .sort((a, b) => {
+                const aExpiry = new Date(
+                    a.expiry?.replace(/\//g, "-") || "2099-12-31"
+                );
+                const bExpiry = new Date(
+                    b.expiry?.replace(/\//g, "-") || "2099-12-31"
+                );
+                return aExpiry - bExpiry;
+            })
+            .slice(0, 8);
+    } else if (category === "新上架") {
+        featuredCoupons = coupons
+            .filter((coupon) => isNewCoupon(coupon))
+            .sort(
+                (a, b) =>
+                    new Date(b.created_at || 0) - new Date(a.created_at || 0)
+            )
+            .slice(0, 8);
+    } else {
+        // 特定分類：顯示該分類最熱門的
+        featuredCoupons = coupons
+            .filter((coupon) => coupon.category === category)
+            .sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
+            .slice(0, 8);
+    }
+
+    container.innerHTML = featuredCoupons
+        .map((coupon) => {
+            const discount = getDiscountDisplay(coupon);
+            const expiry = getExpiryDisplay(coupon);
+            const webp = coupon.image.replace(/\.jpg$/i, ".webp");
+
+            return `
+            <div class="featured-card" data-id="${coupon.id}" onclick="openModal(coupons.find(c => c.id === ${coupon.id}))">
+                <picture>
+                    <source srcset="${webp}" type="image/webp">
+                    <img src="${coupon.image}" alt="${coupon.title}" class="featured-card-image" loading="lazy">
+                </picture>
+                <div class="featured-card-content">
+                    <h4 class="featured-card-title">${coupon.title}</h4>
+                    <div class="featured-card-info">
+                        <span class="featured-card-category">${coupon.category}</span>
+                        <span class="featured-card-discount">${discount}</span>
+                    </div>
+                    <div class="featured-card-expiry">
+                        <span>⏰</span>
+                        <span>${expiry}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        })
+        .join("");
+}
+
+// 控制首頁推薦區塊顯示/隱藏
+function setRecommendationVisibility(visible) {
+    const section = document.getElementById("recommendationSection");
+    if (!section) return;
+    section.style.display = visible ? "" : "none";
+}
+
+// 視圖切換功能
+function toggleViewType(viewType) {
+    const container = document.getElementById("masonryContainer");
+
+    if (viewType === "list") {
+        container.classList.add("list-view");
+    } else {
+        container.classList.remove("list-view");
+    }
+}
+
 // 重置回首頁
 function resetToHomepage() {
     setView("home");
+    setRecommendationVisibility(true);
     // 清空搜尋框
     document.getElementById("searchInput").value = "";
 
@@ -1050,8 +1633,28 @@ function resetToHomepage() {
     // 更新下拉選單選中狀態
     updateDropdownSelection();
 
-    // 重新渲染所有優惠券
+    // 重置分類導航到"全部"
+    document
+        .querySelectorAll(".category-item")
+        .forEach((el) => el.classList.remove("active"));
+    document
+        .querySelector('.category-item[data-category="all"]')
+        ?.classList.add("active");
+
+    // 重新渲染推薦和所有優惠券
+    renderFeaturedCoupons();
     renderCoupons(coupons);
+
+    // 重置標題
+    const titleElement = document.getElementById("mainSectionTitle");
+    const headerElement = document.getElementById("recommendationHeader");
+    if (titleElement) titleElement.textContent = "所有優惠";
+    if (headerElement) {
+        headerElement.querySelector(".recommendation-title").textContent =
+            "🎯 為您推薦";
+        headerElement.querySelector(".recommendation-subtitle").textContent =
+            "根據您的瀏覽偏好精選優惠";
+    }
 
     // 重置側邊欄選中狀態為首頁
     updateSidebarSelection("首頁");
@@ -1222,18 +1825,20 @@ function handleSidebarAction(action) {
 function showAllCoupons() {
     setView("home");
     removeHistoryClearButton(); // 移除清除按鈕
+    setRecommendationVisibility(true);
     renderCoupons(coupons);
-    showSuccessMessage("回到首頁");
 }
 
 // 顯示收藏列表
 async function showFavorites() {
     removeHistoryClearButton(); // 移除清除按鈕
+    setRecommendationVisibility(false);
     await viewFavorites(); // 使用現有的收藏功能
 }
 
 // 顯示瀏覽記錄
 function showHistory() {
+    setRecommendationVisibility(false);
     const historyIds = historyData.map((item) => item.id);
     const historyCoupons = coupons.filter((coupon) =>
         historyIds.includes(coupon.id)
@@ -1254,7 +1859,6 @@ function showHistory() {
     // 如果沒有瀏覽記錄，顯示空狀態
     if (historyData.length === 0) {
         renderEmptyHistory();
-        showSuccessMessage("目前沒有瀏覽記錄");
         return;
     }
 
@@ -1268,7 +1872,6 @@ function showHistory() {
     // 在頁面頂部添加清除按鈕
     addHistoryClearButton();
     renderCoupons(sortedHistory);
-    showSuccessMessage(`顯示 ${sortedHistory.length} 個瀏覽記錄`);
 }
 
 // 顯示熱門優惠
@@ -1280,12 +1883,12 @@ function showHotCoupons() {
     );
     renderCoupons(hotCoupons);
 
-    // 更新計數
+    // 更新計數（不提示）
     const hotCountEl = document.getElementById("hotCount");
     hotCountEl.textContent = hotCoupons.length;
     hotCountEl.style.display = "inline-block";
 
-    showSuccessMessage("顯示熱門優惠");
+    // 不顯示提示
 }
 
 // 顯示附近優惠（模擬地理位置）
@@ -1298,12 +1901,12 @@ function showNearbyCoupons() {
 
     renderCoupons(nearbyCoupons);
 
-    // 更新計數
+    // 更新計數（不提示）
     const nearbyCountEl = document.getElementById("nearbyCount");
     nearbyCountEl.textContent = nearbyCount;
     nearbyCountEl.style.display = "inline-block";
 
-    showSuccessMessage(`找到 ${nearbyCount} 個附近優惠`);
+    // 不顯示提示
 }
 
 // 顯示限時活動
@@ -1320,12 +1923,12 @@ function showLimitedCoupons() {
 
     renderCoupons(limitedCoupons);
 
-    // 更新計數
+    // 更新計數（不提示）
     const limitedCountEl = document.getElementById("limitedCount");
     limitedCountEl.textContent = limitedCoupons.length;
     limitedCountEl.style.display = "inline-block";
 
-    showSuccessMessage(`找到 ${limitedCoupons.length} 個限時活動`);
+    // 不顯示提示
 }
 
 // 顯示設定面板
@@ -1886,6 +2489,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     loadCouponsFromApi();
     loadCategories();
+    loadTagsAndRegions();
     setupSidebarToggle();
     renderSearchHistory();
 
@@ -2059,6 +2663,38 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector(".logo").addEventListener("click", (e) => {
         e.preventDefault();
         resetToHomepage();
+    });
+
+    // 分類導航點擊事件
+    document.querySelectorAll(".category-item").forEach((item) => {
+        item.addEventListener("click", (e) => {
+            e.preventDefault();
+
+            // 更新選中狀態
+            document
+                .querySelectorAll(".category-item")
+                .forEach((el) => el.classList.remove("active"));
+            item.classList.add("active");
+
+            const category = item.getAttribute("data-category");
+            handleCategoryNavigation(category);
+        });
+    });
+
+    // 視圖切換事件
+    document.querySelectorAll(".view-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+
+            // 更新選中狀態
+            document
+                .querySelectorAll(".view-btn")
+                .forEach((el) => el.classList.remove("active"));
+            btn.classList.add("active");
+
+            const viewType = btn.getAttribute("data-view");
+            toggleViewType(viewType);
+        });
     });
 
     // 舊的側邊欄事件監聽器已移除，使用新的data-action屬性處理
@@ -2287,7 +2923,6 @@ async function viewFavorites() {
     setSidebarActive("favorites");
     setView("favorites");
     renderCoupons(); // 重新渲染優惠券以顯示收藏內容
-    showSuccessMessage("切換到收藏頁面");
 }
 
 function viewHistory() {
@@ -2296,7 +2931,6 @@ function viewHistory() {
     // 直接使用側邊欄的歷史記錄功能
     setSidebarActive("history");
     showHistory();
-    showSuccessMessage(`已顯示 ${historyData.length} 筆瀏覽記錄`);
 }
 
 function logout() {
@@ -2379,12 +3013,11 @@ function clearAllFilters() {
     // 重置排序選項
     document.getElementById("sortSelect").value = "default";
 
-    // 重新載入所有優惠券
+    // 重新載入所有優惠券（不彈出提示）
     renderCoupons(coupons);
-    showSuccessMessage("已清除所有篩選條件");
 }
 
-function applyAdvancedFilters() {
+async function applyAdvancedFilters() {
     let filteredCoupons = [...coupons];
 
     // 分類篩選
@@ -2429,7 +3062,102 @@ function applyAdvancedFilters() {
         });
     }
 
-    // 排序
+    // 快速篩選：hot / expiring-soon / new / bogo（其餘 quick 標籤交由 API）
+    const quickSelected = Array.from(
+        document.querySelectorAll(
+            '#quickFilters input[type="checkbox"]:checked'
+        )
+    ).map((cb) => cb.value);
+
+    // quick 標籤一律交由 API 篩選（此處不做本地 quick 推斷）
+
+    // 地區：目前先當作關鍵字包含於 address
+    const regionSelected = Array.from(
+        document.querySelectorAll(
+            '#regionFilters input[type="checkbox"]:checked'
+        )
+    ).map((cb) => cb.getAttribute("data-name"));
+
+    if (regionSelected.length > 0) {
+        filteredCoupons = filteredCoupons.filter((c) => {
+            const addr = (c.address || "") + "";
+            return regionSelected.some((name) => addr.includes(name));
+        });
+    }
+
+    // 若後端可用，改走 API 以使用真正的關聯篩選
+    try {
+        const tagSlugs = quickSelected.map((x) => x).join(",");
+        const regionSlugs = regionSelected
+            .map((x) => x && x.toLowerCase && x.toLowerCase())
+            .map((name) => {
+                // 粗略將中文縣市名對應為常用 slug（與種子一致）
+                const map = {
+                    台北市: "taipei",
+                    臺北市: "taipei",
+                    新北市: "new-taipei",
+                    桃園市: "taoyuan",
+                    台中市: "taichung",
+                    臺中市: "taichung",
+                    台南市: "tainan",
+                    臺南市: "tainan",
+                    高雄市: "kaohsiung",
+                };
+                return map[name] || name;
+            })
+            .join(",");
+        const params = new URLSearchParams();
+        if (tagSlugs) params.set("tags", tagSlugs);
+        if (regionSlugs) params.set("regions", regionSlugs);
+        const sortBy = document.getElementById("sortSelect").value;
+        // 先帶入分頁大小，避免一次載太多
+        params.set("page", "1");
+        params.set("pageSize", "50");
+        if (sortBy === "newest") params.set("sort", "created_desc");
+        if (sortBy === "expiry") params.set("sort", "expiry_asc");
+        if (sortBy === "popular") params.set("sort", "view_desc");
+        // 額外併入分類多選（checkbox）→ 後端 categories=a,b,c
+        const selectedCategories = Array.from(
+            document.querySelectorAll(
+                '#categoryFilters input[type="checkbox"]:checked'
+            )
+        ).map((cb) => cb.value);
+        if (selectedCategories.length === 1) {
+            // 向下相容：後端若同時支援 category，仍傳一份
+            params.set("category", selectedCategories[0]);
+        }
+        if (selectedCategories.length > 0) {
+            params.set("categories", selectedCategories.join(","));
+        }
+
+        const resp = await fetch("api/coupons/advanced?" + params.toString());
+        const json = await resp.json();
+        const items = json?.data?.coupons || [];
+        if (items.length > 0) {
+            const mapped = items.map((item, idx) => ({
+                id: item.id || idx + 1,
+                image:
+                    item.image && item.image.trim() !== ""
+                        ? item.image
+                        : `img/送齁康文宣素材 (${(idx % 50) + 1}).jpg`,
+                storeName: item.storeName || "合作店家",
+                category: item.category || "一般優惠",
+                title: item.title || "優惠活動",
+                description: item.description || "詳情請見活動說明。",
+                expiry: item.expiry || "",
+                usage: item.usage || "每人限用一次",
+                address: item.address || "",
+                phone: item.phone || "",
+            }));
+            renderCoupons(mapped);
+            closeFilterPanel();
+            return;
+        }
+    } catch (e) {
+        // ignore; 走本地 fallback
+    }
+
+    // 排序（僅在本地結果時生效；走 API 會被覆蓋）
     const sortBy = document.getElementById("sortSelect").value;
     switch (sortBy) {
         case "newest":
@@ -2460,7 +3188,6 @@ function applyAdvancedFilters() {
 
     renderCoupons(filteredCoupons);
     closeFilterPanel();
-
     const count = filteredCoupons.length;
     showSuccessMessage(`已套用篩選條件，找到 ${count} 張優惠券`);
 }
@@ -2497,8 +3224,27 @@ function closeAuth() {
     document.body.style.overflow = "auto";
 }
 
-// 顯示成功訊息
+// 僅在重要操作時顯示提示訊息
+function shouldShowToast(message) {
+    try {
+        const suppressPatterns = [
+            /切換到/, // 視圖切換、頁面切換
+            /^顯示\s+\d+\s*/, // 顯示 X 個…
+            /^找到\s+\d+\s*/, // 找到 X 個…
+            /回到首頁/, // 返回首頁
+            /目前沒有瀏覽記錄/, // 空狀態資訊
+            /已顯示\s+\d+\s*筆瀏覽記錄/, // 列表統計
+            /已套用篩選條件/, // 套用篩選
+        ];
+        return !suppressPatterns.some((re) => re.test(String(message)));
+    } catch {
+        return true;
+    }
+}
+
+// 顯示成功訊息（僅在 shouldShowToast 通過時才顯示）
 function showSuccessMessage(message) {
+    if (!shouldShowToast(message)) return;
     // 創建成功提示
     const successDiv = document.createElement("div");
     successDiv.style.cssText = `

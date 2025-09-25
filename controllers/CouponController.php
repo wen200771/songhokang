@@ -570,17 +570,31 @@ class CouponController {
             $errors['discount_type'] = '優惠類型為必填';
         }
 
-        if (empty($input['discount_value'] ?? '')) {
-            $errors['discount_value'] = '優惠值為必填';
-        } else {
-            $discountValue = (float)$input['discount_value'];
-            if ($discountValue < 0) {
+        $discountType = $input['discount_type'] ?? null;
+        $hasValueField = array_key_exists('discount_value', (array)$input);
+        $discountValueRaw = $hasValueField ? $input['discount_value'] : null;
+
+        if (in_array($discountType, ['bogo', 'free'], true)) {
+            // 買一送一/免費：允許 0 或不填，但若有填就需為數字且 >= 0
+            if ($hasValueField && $discountValueRaw !== '' && !is_numeric($discountValueRaw)) {
+                $errors['discount_value'] = '優惠值必須為數字';
+            } elseif (is_numeric($discountValueRaw) && (float)$discountValueRaw < 0) {
                 $errors['discount_value'] = '優惠值不能為負數';
             }
-
-            // 百分比折扣驗證
-            if ($input['discount_type'] === 'percentage' && $discountValue > 100) {
-                $errors['discount_value'] = '百分比折扣不能超過 100%';
+        } else {
+            // 其他類型（percentage/fixed）為必填且需為數字
+            if ($discountValueRaw === null || $discountValueRaw === '') {
+                $errors['discount_value'] = '優惠值為必填';
+            } elseif (!is_numeric($discountValueRaw)) {
+                $errors['discount_value'] = '優惠值必須為數字';
+            } else {
+                $discountValue = (float)$discountValueRaw;
+                if ($discountValue < 0) {
+                    $errors['discount_value'] = '優惠值不能為負數';
+                }
+                if ($discountType === 'percentage' && ($discountValue < 0 || $discountValue > 100)) {
+                    $errors['discount_value'] = '百分比折扣必須介於 0 到 100';
+                }
             }
         }
 

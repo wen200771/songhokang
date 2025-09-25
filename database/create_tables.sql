@@ -174,6 +174,70 @@ CREATE TABLE `system_settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系統設定表';
 
 -- ----------------------------
+-- 7.1 標籤表（快速篩選/主題/福利）
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS `tags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `slug` varchar(50) NOT NULL,
+  `type` enum('quick','topic','benefit') NOT NULL DEFAULT 'quick' COMMENT '類型：快速篩選/主題/福利',
+  `description` text DEFAULT NULL,
+  `icon` varchar(100) DEFAULT NULL,
+  `color` varchar(7) DEFAULT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`),
+  KEY `type` (`type`),
+  KEY `sort_order` (`sort_order`),
+  KEY `is_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='標籤表';
+
+-- 關聯：優惠券-標籤（多對多）
+CREATE TABLE IF NOT EXISTS `coupon_tags` (
+  `coupon_id` int(11) NOT NULL,
+  `tag_id` int(11) NOT NULL,
+  PRIMARY KEY (`coupon_id`,`tag_id`),
+  KEY `tag_id` (`tag_id`),
+  FOREIGN KEY (`coupon_id`) REFERENCES `coupons`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`tag_id`) REFERENCES `tags`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='優惠券標籤關聯';
+
+-- ----------------------------
+-- 7.2 地區表（層級：1=縣市，2=行政區，3=商圈）
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS `regions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `slug` varchar(50) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `level` tinyint(1) NOT NULL DEFAULT 1,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`),
+  KEY `parent_id` (`parent_id`),
+  KEY `level` (`level`),
+  KEY `sort_order` (`sort_order`),
+  KEY `is_active` (`is_active`),
+  FOREIGN KEY (`parent_id`) REFERENCES `regions`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='地區表';
+
+-- 關聯：優惠券-地區（多對多）
+CREATE TABLE IF NOT EXISTS `coupon_regions` (
+  `coupon_id` int(11) NOT NULL,
+  `region_id` int(11) NOT NULL,
+  PRIMARY KEY (`coupon_id`,`region_id`),
+  KEY `region_id` (`region_id`),
+  FOREIGN KEY (`coupon_id`) REFERENCES `coupons`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`region_id`) REFERENCES `regions`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='優惠券地區關聯';
+
+-- ----------------------------
 -- 8. 操作日誌表
 -- ----------------------------
 CREATE TABLE `admin_logs` (
@@ -199,12 +263,19 @@ CREATE TABLE `admin_logs` (
 
 -- 插入預設分類
 INSERT INTO `categories` (`name`, `slug`, `description`, `icon`, `color`, `sort_order`) VALUES
-('美食餐飲', 'food', '餐廳、咖啡廳、小吃等美食相關優惠', '🍽️', '#ff6b6b', 1),
-('購物商城', 'shopping', '服飾、3C、生活用品等購物優惠', '🛍️', '#4ecdc4', 2),
-('美容保養', 'beauty', '美髮、美甲、SPA等美容相關優惠', '💄', '#45b7d1', 3),
-('休閒娛樂', 'entertainment', '電影、KTV、遊戲等娛樂優惠', '🎮', '#f9ca24', 4),
-('旅遊住宿', 'travel', '飯店、民宿、景點等旅遊優惠', '✈️', '#6c5ce7', 5),
-('健康醫療', 'health', '診所、藥局、健身等健康相關優惠', '🏥', '#a29bfe', 6);
+('美食餐飲', 'food', '餐廳、咖啡廳、小吃等美食相關優惠', '🍽️', '#ff6b6b', 10),
+('超市量販', 'grocery', '超市、量販、便利商店、生鮮日用', '🛒', '#4ecdc4', 20),
+('服飾鞋包', 'fashion', '男/女/童裝、鞋類、包款、飾品配件', '👗', '#f78fb3', 30),
+('3C數位家電', 'electronics', '手機、電腦、周邊、家電、智慧家居', '💻', '#54a0ff', 40),
+('美容保養', 'beauty', '美髮、美甲、SPA、按摩、藥妝/保養', '💄', '#45b7d1', 50),
+('休閒娛樂', 'entertainment', '電影、KTV、桌遊、主題樂園、藝文展演', '🎮', '#f9ca24', 60),
+('旅遊住宿', 'travel', '飯店、民宿、景點門票、旅行社及行程', '✈️', '#6c5ce7', 70),
+('運動健身', 'sports', '健身房、瑜珈、運動用品、球館/場地', '🏋️', '#10b981', 80),
+('生活服務', 'services', '洗衣清潔、家修/水電、搬家、影印/攝影', '🧰', '#a3a3a3', 90),
+('汽機車車用', 'auto', '保養維修、洗車、輪胎配件、加油/充電', '🚗', '#ffa502', 100),
+('教育學習', 'education', '語言證照、線上課程、才藝補習、兒童學習', '📚', '#ff9f43', 110),
+('母嬰親子', 'parenting', '嬰幼用品、親子餐廳、親子樂園、孕產照護', '👶', '#f78fb3', 120),
+('健康醫療', 'health', '診所、牙醫、眼科配鏡、藥局、保健食品', '🏥', '#a29bfe', 130);
 
 -- 插入系統管理員帳號 (密碼: admin123)
 INSERT INTO `users` (`username`, `email`, `password`, `role`, `status`) VALUES

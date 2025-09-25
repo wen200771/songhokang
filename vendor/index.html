@@ -113,6 +113,10 @@
             color: #1f2937;
         }
 
+        .header .logo span {
+            font-size: 24px;
+        }
+
         .header .actions {
             display: flex;
             gap: var(--space-3);
@@ -356,7 +360,7 @@
 
         .table-container th {
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            padding: 12px 8px;
+            padding: 12px 16px;
             text-align: left;
             font-weight: 700;
             font-size: 14px;
@@ -366,7 +370,7 @@
         }
 
         .table-container td {
-            padding: 12px 8px;
+            padding: 12px 16px;
             border-bottom: 1px solid #f3f4f6;
             font-size: 14px;
             vertical-align: top;
@@ -384,6 +388,41 @@
             border-bottom: none;
         }
 
+        /* 統一欄位寬度與對齊（與其他分頁一致） */
+        .col-id {
+            width: 60px;
+        }
+
+        .col-stats {
+            width: 100px;
+        }
+
+        .col-expiry {
+            width: 120px;
+        }
+
+        .id-cell {
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .stats-cell {
+            text-align: center;
+        }
+
+        /* 儀表板表格卡片與列表卡片對齊的內距與半徑 */
+        .card.compact-table .card-body {
+            padding: 16px 24px;
+        }
+
+        .card.compact-table .table-container th,
+        .card.compact-table .table-container td,
+        .card.compact-table thead th,
+        .card.compact-table tbody td {
+            padding: 12px 16px;
+        }
+
         /* 保持向後兼容 */
         table {
             width: 100%;
@@ -392,7 +431,7 @@
 
         thead th {
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            padding: 12px 8px;
+            padding: 12px 16px;
             text-align: left;
             font-weight: 700;
             font-size: 14px;
@@ -402,7 +441,7 @@
         }
 
         tbody td {
-            padding: 12px 8px;
+            padding: 12px 16px;
             border-bottom: 1px solid #f3f4f6;
             font-size: 14px;
             vertical-align: top;
@@ -613,43 +652,7 @@
             color: #92400e;
         }
 
-        /* 漏斗分析 */
-        .funnel-container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .funnel-step {
-            margin-bottom: 16px;
-        }
-
-        .funnel-bar {
-            position: relative;
-            height: 60px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            color: white;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .funnel-bar:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .funnel-label {
-            font-size: 16px;
-        }
-
-        .funnel-value {
-            font-size: 18px;
-            font-weight: 700;
-        }
+        /* analytics 已移除：funnel styles purged */
 
         /* 統計圖標 */
         .stat-icon {
@@ -658,80 +661,7 @@
             display: block;
         }
 
-        /* 排行榜樣式 */
-        .ranking-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            background: #f8fafc;
-            transition: all 0.3s ease;
-        }
-
-        .ranking-item:hover {
-            background: #e2e8f0;
-        }
-
-        .ranking-number {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: white;
-            font-size: 14px;
-        }
-
-        .ranking-number.gold {
-            background: #fbbf24;
-        }
-
-        .ranking-number.silver {
-            background: #9ca3af;
-        }
-
-        .ranking-number.bronze {
-            background: #d97706;
-        }
-
-        .ranking-number.other {
-            background: #6b7280;
-        }
-
-        .ranking-info {
-            flex: 1;
-            margin-left: 12px;
-        }
-
-        .ranking-title {
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 2px;
-        }
-
-        .ranking-meta {
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .ranking-stats {
-            text-align: right;
-        }
-
-        .ranking-primary {
-            font-weight: 700;
-            color: #FCA311;
-            font-size: 16px;
-        }
-
-        .ranking-secondary {
-            font-size: 12px;
-            color: #6b7280;
-        }
+        /* analytics 已移除：ranking styles purged */
 
         /* 批量操作樣式 */
         .batch-operations {
@@ -1268,12 +1198,7 @@
                         <span>客戶管理</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#analytics" class="nav-link" data-section="analytics">
-                        <span class="nav-icon">📈</span>
-                        <span>數據分析</span>
-                    </a>
-                </li>
+
                 <li class="nav-item">
                     <a href="#verification" class="nav-link" data-section="verification">
                         <span class="nav-icon">🔍</span>
@@ -1325,7 +1250,7 @@
                         </div>
 
                         <!-- 公司資訊卡片 -->
-                        <div class="card">
+                        <div class="card compact-table">
                             <div class="card-header">
                                 <div class="card-title">
                                     <span>🏢</span>
@@ -1342,7 +1267,7 @@
                         </div>
 
                         <!-- 最近優惠券 -->
-                        <div class="card">
+                        <div class="card compact-table">
                             <div class="card-header">
                                 <div class="card-title">
                                     <span>🎫</span>
@@ -1350,26 +1275,28 @@
                                 </div>
                                 <button class="btn primary" onclick="showSection('coupons')">查看全部</button>
                             </div>
-                            <div class="table-container">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>標題</th>
-                                            <th>狀態</th>
-                                            <th>瀏覽次數</th>
-                                            <th>到期日</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="recentCoupons">
-                                        <tr>
-                                            <td colspan="5" style="text-align:center;color:#777;padding:40px;">
-                                                <div class="loading"></div>
-                                                <span style="margin-left: 12px;">載入中...</span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div class="card-body">
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th class="col-id">ID</th>
+                                                <th>標題</th>
+                                                <th>狀態</th>
+                                                <th class="col-stats">數據</th>
+                                                <th class="col-expiry">到期日</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recentCoupons">
+                                            <tr>
+                                                <td colspan="5" style="text-align:center;color:#777;padding:40px;">
+                                                    <div class="loading"></div>
+                                                    <span style="margin-left: 12px;">載入中...</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1462,148 +1389,121 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <div id="couponPagination"
+                                    style="display:flex;gap:8px;justify-content:center;align-items:center;margin-top:16px;">
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 其他區域佔位 -->
+                    <!-- 訂單管理（以核銷記錄為準） -->
                     <div id="orders-section" class="section">
-                        <div class="card">
-                            <div class="empty-state">
-                                <div class="icon">📦</div>
-                                <h3>訂單管理</h3>
-                                <p>訂單管理功能即將推出</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="customers-section" class="section">
-                        <div class="card">
-                            <div class="empty-state">
-                                <div class="icon">👥</div>
-                                <h3>客戶管理</h3>
-                                <p>客戶管理功能即將推出</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="analytics-section" class="section">
-                        <!-- 分析控制面板 -->
                         <div class="card">
                             <div class="card-header">
                                 <div class="card-title">
-                                    <span class="icon">📈</span>
-                                    <span>數據分析</span>
+                                    <span>📦</span>
+                                    <span>訂單管理</span>
                                 </div>
-                                <div class="card-actions">
-                                    <select id="analyticsTimeRange" class="filter-select" style="margin-right: 12px;">
-                                        <option value="7">最近7天</option>
-                                        <option value="30" selected>最近30天</option>
-                                        <option value="90">最近90天</option>
-                                        <option value="365">最近一年</option>
+                                <div class="card-actions" style="display:flex;gap:12px;align-items:center;">
+                                    <div class="search-box">
+                                        <span class="search-icon">🔍</span>
+                                        <input type="text" id="ordersSearch" class="search-input"
+                                            placeholder="搜尋驗證碼、優惠券、客戶...">
+                                    </div>
+                                    <select id="ordersFilter" class="filter-select">
+                                        <option value="today">今天</option>
+                                        <option value="week">本週</option>
+                                        <option value="month" selected>本月</option>
+                                        <option value="all">全部</option>
                                     </select>
-                                    <button class="btn secondary" onclick="exportAnalyticsData()">
-                                        <span>📊</span>
-                                        <span>導出報表</span>
+                                    <button class="btn secondary" onclick="exportOrdersData()">
+                                        <span>📤</span>
+                                        <span>導出</span>
                                     </button>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- 核心指標卡片 -->
-                        <div class="stats-grid">
-                            <div class="card stat-card">
-                                <div class="stat-icon">👀</div>
-                                <div class="stat-number" id="analyticsViews">-</div>
-                                <div class="stat-label">總瀏覽次數</div>
-                                <div class="stat-change" id="analyticsViewsChange">-</div>
-                            </div>
-                            <div class="card stat-card">
-                                <div class="stat-icon">❤️</div>
-                                <div class="stat-number" id="analyticsFavorites">-</div>
-                                <div class="stat-label">總收藏次數</div>
-                                <div class="stat-change" id="analyticsFavoritesChange">-</div>
-                            </div>
-                            <div class="card stat-card">
-                                <div class="stat-icon">✅</div>
-                                <div class="stat-number" id="analyticsUsage">-</div>
-                                <div class="stat-label">總使用次數</div>
-                                <div class="stat-change" id="analyticsUsageChange">-</div>
-                            </div>
-                            <div class="card stat-card">
-                                <div class="stat-icon">📈</div>
-                                <div class="stat-number" id="analyticsConversion">-%</div>
-                                <div class="stat-label">平均轉換率</div>
-                                <div class="stat-change" id="analyticsConversionChange">-</div>
-                            </div>
-                        </div>
-
-                        <!-- 圖表區域 -->
-                        <div class="chart-grid">
-                            <!-- 趨勢圖表 -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <div class="card-title">
-                                        <span class="icon">📊</span>
-                                        <span>使用趨勢分析</span>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="trendChart" width="400" height="200"></canvas>
-                                </div>
-                            </div>
-
-                            <!-- 優惠券效果排行 -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <div class="card-title">
-                                        <span class="icon">🏆</span>
-                                        <span>熱門優惠券排行</span>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div id="topCouponsRanking">
-                                        <div style="text-align: center; padding: 40px; color: #6b7280;">
-                                            <div class="loading"></div>
-                                            <p style="margin-top: 12px;">載入中...</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 轉換漏斗分析 -->
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="card-title">
-                                    <span class="icon">🔄</span>
-                                    <span>轉換漏斗分析</span>
-                                </div>
-                            </div>
                             <div class="card-body">
-                                <div class="funnel-container">
-                                    <div class="funnel-step">
-                                        <div class="funnel-bar" style="width: 100%; background: #3b82f6;">
-                                            <span class="funnel-label">瀏覽</span>
-                                            <span class="funnel-value" id="funnelViews">-</span>
-                                        </div>
-                                    </div>
-                                    <div class="funnel-step">
-                                        <div class="funnel-bar" style="width: 60%; background: #10b981;">
-                                            <span class="funnel-label">收藏</span>
-                                            <span class="funnel-value" id="funnelFavorites">-</span>
-                                        </div>
-                                    </div>
-                                    <div class="funnel-step">
-                                        <div class="funnel-bar" style="width: 25%; background: #f59e0b;">
-                                            <span class="funnel-label">使用</span>
-                                            <span class="funnel-value" id="funnelUsage">-</span>
-                                        </div>
-                                    </div>
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 160px;">時間</th>
+                                                <th style="width: 160px;">驗證碼</th>
+                                                <th>優惠券</th>
+                                                <th style="width: 220px;">客戶</th>
+                                                <th style="width: 120px;">折扣</th>
+                                                <th style="width: 80px;">狀態</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="ordersRows">
+                                            <tr>
+                                                <td colspan="6"
+                                                    style="text-align: center; padding: 40px; color: #6b7280;">
+                                                    <div class="loading"></div>
+                                                    <p style="margin-top: 12px;">載入訂單中...</p>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- 客戶管理（由核銷記錄彙總） -->
+                    <div id="customers-section" class="section">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <span>👥</span>
+                                    <span>客戶管理</span>
+                                </div>
+                                <div class="card-actions" style="display:flex;gap:12px;align-items:center;">
+                                    <div class="search-box">
+                                        <span class="search-icon">🔍</span>
+                                        <input type="text" id="customersSearch" class="search-input"
+                                            placeholder="搜尋姓名、Email...">
+                                    </div>
+                                    <select id="customersFilter" class="filter-select">
+                                        <option value="today">今天</option>
+                                        <option value="week">本週</option>
+                                        <option value="month" selected>本月</option>
+                                        <option value="all">全部</option>
+                                    </select>
+                                    <button class="btn secondary" onclick="exportCustomersData()">
+                                        <span>📤</span>
+                                        <span>導出</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>用戶</th>
+                                                <th>Email</th>
+                                                <th style="width: 120px;">核銷次數</th>
+                                                <th style="width: 200px;">最近核銷時間</th>
+                                                <th style="width: 120px;">優惠券數</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="customersRows">
+                                            <tr>
+                                                <td colspan="5"
+                                                    style="text-align: center; padding: 40px; color: #6b7280;">
+                                                    <div class="loading"></div>
+                                                    <p style="margin-top: 12px;">載入客戶中...</p>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
 
                     <!-- 核銷管理 -->
                     <div id="verification-section" class="section" style="display: none;">
@@ -1869,6 +1769,7 @@
 
         let currentVendor = null;
         let currentSection = 'dashboard';
+        let currentUserRole = null;
 
         // 導航切換功能
         function showSection(sectionName) {
@@ -1889,16 +1790,23 @@
             // 載入對應數據
             if (sectionName === 'coupons' && currentVendor) {
                 loadCoupons(currentVendor.id, '');
-            } else if (sectionName === 'analytics') {
-                // 延遲載入數據分析，確保 DOM 已渲染
-                setTimeout(() => {
-                    loadAnalyticsData();
-                }, 100);
             } else if (sectionName === 'verification') {
                 // 載入核銷管理數據
                 setTimeout(() => {
                     loadVerificationData();
                 }, 100);
+            } else if (sectionName === 'orders') {
+                setTimeout(() => {
+                    const f = document.getElementById('ordersFilter').value || 'month';
+                    const qv = document.getElementById('ordersSearch').value || '';
+                    loadOrders(f, qv);
+                }, 50);
+            } else if (sectionName === 'customers') {
+                setTimeout(() => {
+                    const f = document.getElementById('customersFilter').value || 'month';
+                    const qv = document.getElementById('customersSearch').value || '';
+                    loadCustomers(f, qv);
+                }, 50);
             }
         }
 
@@ -1917,6 +1825,7 @@
                     document.getElementById('guard').style.display = 'block';
                     return { ok: false };
                 }
+                currentUserRole = j.data?.role || null;
                 if ((j.data?.role || '') !== 'vendor' && (j.data?.role || '') !== 'admin') {
                     const guardEl = document.getElementById('guard');
                     guardEl.querySelector('h3').textContent = '權限不足';
@@ -2062,13 +1971,18 @@
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td style="font-weight: 600; font-size: 14px; text-align: center;">${c.id}</td>
+                    <td class="id-cell">${c.id}</td>
                     <td>
                         <div style="font-weight: 600; margin-bottom: 4px; font-size: 15px; line-height: 1.4; color: #1f2937;">${c.title || '未設定標題'}</div>
                         <div style="font-size: 13px; color: #6b7280; line-height: 1.3;">${c.category || '未分類'}</div>
                     </td>
                     <td><span class="badge ${statusClass}">${statusText}</span></td>
-                    <td style="font-weight: 600; font-size: 14px; text-align: center;">${c.view_count || 0}</td>
+                    <td class="stats-cell">
+                        <div style="font-size: 12px; line-height: 1.2;">
+                            <div style="margin-bottom: 2px;">👁️ ${c.view_count || 0}</div>
+                            <div>✅ ${c.used_count || 0}</div>
+                        </div>
+                    </td>
                     <td style="font-size: 14px;">${c.end_date ? new Date(c.end_date).toLocaleDateString('zh-TW') : '無期限'}</td>
                 `;
                 tbody.appendChild(tr);
@@ -2094,7 +2008,29 @@
 
                 const r = await fetch(url);
                 const j = await r.json();
-                const list = j?.data?.coupons || [];
+                let list = j?.data?.coupons || [];
+
+                // 應用前端篩選與排序（後端若未支援時）
+                const { status, category, sort } = (filters || {});
+                if (status) list = list.filter(c => (c.status || '') === status);
+                if (category) list = list.filter(c => (c.category || '') === category);
+                if (q) {
+                    const kw = q.toLowerCase();
+                    list = list.filter(c =>
+                        String(c.title || '').toLowerCase().includes(kw) ||
+                        String(c.description || '').toLowerCase().includes(kw)
+                    );
+                }
+                if (sort) {
+                    const compare = {
+                        created_desc: (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0),
+                        created_asc: (a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0),
+                        views_desc: (a, b) => (b.view_count || 0) - (a.view_count || 0),
+                        views_asc: (a, b) => (a.view_count || 0) - (b.view_count || 0),
+                        usage_desc: (a, b) => (b.used_count || 0) - (a.used_count || 0)
+                    }[sort];
+                    if (compare) list = list.slice().sort(compare);
+                }
 
                 tbody.innerHTML = '';
 
@@ -2114,7 +2050,17 @@
                     return;
                 }
 
-                list.forEach(c => {
+                // 簡易分頁（每頁 10 筆）
+                const pageSize = 10;
+                const page = Number((filters && filters.page) || 1);
+                const total = list.length;
+                const totalPages = Math.max(1, Math.ceil(total / pageSize));
+                const start = (page - 1) * pageSize;
+                const paged = list.slice(start, start + pageSize);
+
+                renderCouponPagination(page, totalPages, q, filters);
+
+                paged.forEach(c => {
                     const statusClass = `status-${c.status || 'pending'}`;
                     const statusText = {
                         'pending': '待審核',
@@ -2170,11 +2116,51 @@
             }
         }
 
+        function renderCouponPagination(current, totalPages, q, filters) {
+            const el = document.getElementById('couponPagination');
+            if (!el) return;
+            el.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            const makeBtn = (label, page, disabled = false, active = false) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn' + (active ? ' primary' : ' secondary');
+                btn.textContent = label;
+                btn.disabled = disabled;
+                btn.onclick = () => {
+                    if (currentVendor) {
+                        loadCoupons(currentVendor.id, q, { ...filters, page });
+                    }
+                };
+                return btn;
+            };
+
+            el.appendChild(makeBtn('上一頁', Math.max(1, current - 1), current === 1));
+            for (let p = 1; p <= totalPages; p++) {
+                if (p === 1 || p === totalPages || Math.abs(p - current) <= 1) {
+                    el.appendChild(makeBtn(String(p), p, false, p === current));
+                } else if (p === 2 && current > 3) {
+                    const span = document.createElement('span');
+                    span.textContent = '...';
+                    span.style.margin = '0 4px';
+                    el.appendChild(span);
+                    p = current - 2; // 跳到 current-2 之前會自增 +1
+                } else if (p === current + 2 && current < totalPages - 2) {
+                    const span = document.createElement('span');
+                    span.textContent = '...';
+                    span.style.margin = '0 4px';
+                    el.appendChild(span);
+                    p = totalPages - 1;
+                }
+            }
+            el.appendChild(makeBtn('下一頁', Math.min(totalPages, current + 1), current === totalPages));
+        }
+
         // 優惠券操作函數
         let isEditMode = false;
         let editingCouponId = null;
 
-        function createCoupon() {
+        function createCoupon(template = null) {
             isEditMode = false;
             editingCouponId = null;
 
@@ -2188,8 +2174,18 @@
             // 清空表單
             resetCouponForm();
 
+            // 若有模板，填入預設值
+            if (template) {
+                if (template.title) document.getElementById('couponTitle').value = template.title;
+                if (template.category) document.getElementById('couponCategory').value = template.category;
+                if (template.description) document.getElementById('couponDescription').value = template.description;
+                if (template.usage_rules) document.getElementById('usageRules').value = template.usage_rules;
+            }
+
             // 顯示模態框
-            document.getElementById('couponModal').classList.add('active');
+            const modal = document.getElementById('couponModal');
+            modal.style.display = 'flex';
+            modal.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
@@ -2308,7 +2304,9 @@
         }
 
         function closeCouponModal() {
-            document.getElementById('couponModal').classList.remove('active');
+            const modal = document.getElementById('couponModal');
+            modal.classList.remove('active');
+            modal.style.display = 'none';
             document.body.style.overflow = 'auto';
             resetCouponForm();
         }
@@ -2365,14 +2363,7 @@
             window.location.href = '../index.html';
         };
 
-        const searchInput = document.getElementById('q');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                if (currentVendor && currentSection === 'coupons') {
-                    loadCoupons(currentVendor.id, e.target.value.trim());
-                }
-            });
-        }
+        // 移除舊的 #q 搜索監聽，統一由 coupons 專屬搜索框處理
 
         // 導航事件監聽
         document.querySelectorAll('.nav-link').forEach(link => {
@@ -2449,6 +2440,9 @@
             submitBtn.disabled = true;
             submitLoading.style.display = 'inline-block';
             submitText.textContent = isEditMode ? '更新中...' : '新增中...';
+
+            // 依照需求：提交後直接關閉視窗（避免阻塞操作）
+            setTimeout(() => { try { closeCouponModal(); } catch (e) { } }, 100);
 
             // 清除之前的錯誤
             clearFormErrors();
@@ -2810,7 +2804,7 @@
 
         })();
 
-        // 數據分析相關功能
+        // 數據分析頁面已移除
         let trendChart = null;
 
         // 載入分析數據
@@ -2827,258 +2821,39 @@
                 const data = await response.json();
                 const coupons = data?.data?.coupons || [];
 
-                // 計算分析數據
-                const analytics = calculateAnalytics(coupons, timeRange);
-
-                // 更新界面
-                updateAnalyticsUI(analytics);
-                updateTrendChart(analytics.trends);
-                updateTopCouponsRanking(analytics.topCoupons);
-                updateFunnelAnalysis(analytics.funnel);
+                // 數據分析功能已移除
 
             } catch (error) {
-                console.error('載入分析數據失敗:', error);
+                // ignore
             }
         }
 
         // 計算分析數據
-        function calculateAnalytics(coupons, timeRange) {
-            const now = new Date();
-            const startDate = new Date(now.getTime() - timeRange * 24 * 60 * 60 * 1000);
-
-            // 基礎統計
-            const totalViews = coupons.reduce((sum, c) => sum + (c.view_count || 0), 0);
-            const totalFavorites = coupons.reduce((sum, c) => sum + (c.favorite_count || 0), 0);
-            const totalUsage = coupons.reduce((sum, c) => sum + (c.used_count || 0), 0);
-            const conversionRate = totalViews > 0 ? (totalUsage / totalViews * 100).toFixed(1) : 0;
-
-            // 排序最熱門的優惠券
-            const topCoupons = [...coupons]
-                .sort((a, b) => (b.used_count || 0) - (a.used_count || 0))
-                .slice(0, 5);
-
-            // 模擬趨勢數據（實際應從數據庫獲取歷史數據）
-            const trends = generateTrendData(timeRange);
-
-            // 漏斗分析
-            const funnel = {
-                views: totalViews,
-                favorites: totalFavorites,
-                usage: totalUsage
-            };
-
-            return {
-                totalViews,
-                totalFavorites,
-                totalUsage,
-                conversionRate,
-                topCoupons,
-                trends,
-                funnel
-            };
-        }
+        function calculateAnalytics(coupons, timeRange) { return { totalViews: 0, totalFavorites: 0, totalUsage: 0, conversionRate: 0, topCoupons: [], trends: { labels: [], data: [] }, funnel: { views: 0, favorites: 0, usage: 0 } }; }
 
         // 生成趨勢數據（模擬）
-        function generateTrendData(days) {
-            const data = [];
-            const labels = [];
-
-            for (let i = days - 1; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                labels.push(date.toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' }));
-
-                // 模擬數據（實際應從數據庫獲取）
-                data.push({
-                    views: Math.floor(Math.random() * 100) + 20,
-                    favorites: Math.floor(Math.random() * 30) + 5,
-                    usage: Math.floor(Math.random() * 15) + 2
-                });
-            }
-
-            return { labels, data };
-        }
+        function generateTrendData(days) { return { labels: [], data: [] }; }
 
         // 更新分析界面
-        function updateAnalyticsUI(analytics) {
-            document.getElementById('analyticsViews').textContent = analytics.totalViews;
-            document.getElementById('analyticsFavorites').textContent = analytics.totalFavorites;
-            document.getElementById('analyticsUsage').textContent = analytics.totalUsage;
-            document.getElementById('analyticsConversion').textContent = `${analytics.conversionRate}%`;
-
-            // 更新變化指標（模擬）
-            document.getElementById('analyticsViewsChange').textContent = `較昨日 +${Math.floor(Math.random() * 20)}%`;
-            document.getElementById('analyticsFavoritesChange').textContent = `較昨日 +${Math.floor(Math.random() * 15)}%`;
-            document.getElementById('analyticsUsageChange').textContent = `較昨日 +${Math.floor(Math.random() * 10)}%`;
-            document.getElementById('analyticsConversionChange').textContent = `較昨日 +${Math.floor(Math.random() * 5)}%`;
-        }
+        function updateAnalyticsUI(analytics) { }
 
         // 更新趨勢圖表
-        function updateTrendChart(trends) {
-            const ctx = document.getElementById('trendChart').getContext('2d');
-
-            if (trendChart) {
-                trendChart.destroy();
-            }
-
-            trendChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: trends.labels,
-                    datasets: [{
-                        label: '瀏覽次數',
-                        data: trends.data.map(d => d.views),
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }, {
-                        label: '收藏次數',
-                        data: trends.data.map(d => d.favorites),
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }, {
-                        label: '使用次數',
-                        data: trends.data.map(d => d.usage),
-                        borderColor: '#f59e0b',
-                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
+        function updateTrendChart(trends) { }
 
         // 更新熱門優惠券排行
-        function updateTopCouponsRanking(topCoupons) {
-            const container = document.getElementById('topCouponsRanking');
-
-            if (topCoupons.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #6b7280;">
-                        <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
-                        <p>暫無優惠券數據</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = topCoupons.map((coupon, index) => {
-                const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : 'other';
-                const usageCount = coupon.used_count || 0;
-                const viewCount = coupon.view_count || 0;
-                const conversionRate = viewCount > 0 ? ((usageCount / viewCount) * 100).toFixed(1) : 0;
-
-                return `
-                    <div class="ranking-item">
-                        <div class="ranking-number ${rankClass}">${index + 1}</div>
-                        <div class="ranking-info">
-                            <div class="ranking-title">${coupon.title}</div>
-                            <div class="ranking-meta">${coupon.category || '未分類'}</div>
-                        </div>
-                        <div class="ranking-stats">
-                            <div class="ranking-primary">${usageCount}</div>
-                            <div class="ranking-secondary">使用次數</div>
-                            <div class="ranking-secondary">轉換率 ${conversionRate}%</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
+        function updateTopCouponsRanking(topCoupons) { }
 
         // 更新漏斗分析
-        function updateFunnelAnalysis(funnel) {
-            const maxValue = Math.max(funnel.views, funnel.favorites, funnel.usage);
-
-            // 更新漏斗數值
-            document.getElementById('funnelViews').textContent = funnel.views;
-            document.getElementById('funnelFavorites').textContent = funnel.favorites;
-            document.getElementById('funnelUsage').textContent = funnel.usage;
-
-            // 動態調整漏斗寬度
-            if (maxValue > 0) {
-                const viewsWidth = (funnel.views / maxValue) * 100;
-                const favoritesWidth = (funnel.favorites / maxValue) * 100;
-                const usageWidth = (funnel.usage / maxValue) * 100;
-
-                document.querySelector('#funnelViews').parentElement.style.width = `${viewsWidth}%`;
-                document.querySelector('#funnelFavorites').parentElement.style.width = `${favoritesWidth}%`;
-                document.querySelector('#funnelUsage').parentElement.style.width = `${usageWidth}%`;
-            }
-        }
+        function updateFunnelAnalysis(funnel) { }
 
         // 導出分析數據
-        function exportAnalyticsData() {
-            const timeRange = document.getElementById('analyticsTimeRange').value;
-
-            // 模擬導出數據
-            const csvData = [
-                ['日期', '瀏覽次數', '收藏次數', '使用次數', '轉換率'],
-                ...Array.from({ length: parseInt(timeRange) }, (_, i) => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - (parseInt(timeRange) - 1 - i));
-                    return [
-                        date.toLocaleDateString('zh-TW'),
-                        Math.floor(Math.random() * 100) + 20,
-                        Math.floor(Math.random() * 30) + 5,
-                        Math.floor(Math.random() * 15) + 2,
-                        (Math.random() * 20 + 5).toFixed(1) + '%'
-                    ];
-                })
-            ];
-
-            const csvContent = csvData.map(row => row.join(',')).join('\n');
-            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-
-            link.setAttribute('href', url);
-            link.setAttribute('download', `優惠券分析報表_${new Date().toLocaleDateString('zh-TW').replace(/\//g, '')}.csv`);
-            link.style.visibility = 'hidden';
-
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+        function exportAnalyticsData() { }
 
         // 時間範圍變更事件
-        document.addEventListener('DOMContentLoaded', function () {
-            const timeRangeSelect = document.getElementById('analyticsTimeRange');
-            if (timeRangeSelect) {
-                timeRangeSelect.addEventListener('change', function () {
-                    loadAnalyticsData(parseInt(this.value));
-                });
-            }
-        });
+        document.addEventListener('DOMContentLoaded', function () { });
 
         // 在切換到數據分析頁面時載入數據
-        function switchToAnalytics() {
-            loadAnalyticsData();
-        }
+        function switchToAnalytics() { }
 
         // 優惠券管理增強功能
         let selectedCoupons = new Set();
@@ -3155,6 +2930,13 @@
                 batchBtn.classList.add('secondary');
                 batchBtn.classList.remove('primary');
             }
+
+            // 角色保護：廠商不可批量變更狀態（僅限管理員）
+            if (currentUserRole !== 'admin') {
+                batchBtn.title = '僅管理員可批量變更狀態，廠商可使用分類/刪除';
+            } else {
+                batchBtn.removeAttribute('title');
+            }
         }
 
         // 打開批量操作模態窗
@@ -3164,7 +2946,11 @@
                 return;
             }
 
+            const existing = document.getElementById('batchOpsModal');
+            if (existing) existing.remove();
+
             const modal = document.createElement('div');
+            modal.id = 'batchOpsModal';
             modal.className = 'modal-overlay';
             modal.style.cssText = 'display: flex; z-index: 10000; background: rgba(0,0,0,0.6);';
 
@@ -3172,18 +2958,18 @@
                 <div class="modal-content" style="max-width: 500px;">
                     <div class="modal-header">
                         <h3>批量操作 (${selectedCoupons.size} 個優惠券)</h3>
-                        <button onclick="this.closest('.modal-overlay').remove()" class="modal-close">×</button>
+                        <button onclick="document.getElementById('batchOpsModal').remove()" class="modal-close">×</button>
                     </div>
                     <div class="modal-body">
                         <div class="batch-operations">
-                            <button class="batch-btn" onclick="batchUpdateStatus('active')">
+                            <button class="batch-btn" onclick="batchUpdateStatus('active')" ${'${currentUserRole !== \"admin\" ? "disabled" : ""}'}>
                                 <span>🟢</span>
                                 <div>
                                     <div class="batch-title">批量上架</div>
                                     <div class="batch-desc">將選中的優惠券設為上線中</div>
                                 </div>
                             </button>
-                            <button class="batch-btn" onclick="batchUpdateStatus('paused')">
+                            <button class="batch-btn" onclick="batchUpdateStatus('paused')" ${'${currentUserRole !== \"admin\" ? "disabled" : ""}'}>
                                 <span>⏸️</span>
                                 <div>
                                     <div class="batch-title">批量暫停</div>
@@ -3221,23 +3007,35 @@
 
         // 批量更新狀態
         async function batchUpdateStatus(status) {
+            if (currentUserRole !== 'admin') {
+                alert('此操作僅限管理員。請聯繫管理員或使用單筆編輯。');
+                return;
+            }
             if (!confirm(`確定要將 ${selectedCoupons.size} 個優惠券的狀態更改為「${status}」嗎？`)) {
                 return;
             }
 
             try {
-                // 這裡應該調用後端API進行批量更新
-                // 暫時模擬操作
+                // 逐一呼叫後端更新狀態（如需最佳化可改為批次端點）
                 for (let couponId of selectedCoupons) {
-                    console.log(`更新優惠券 ${couponId} 狀態為 ${status}`);
+                    const resp = await fetch(`../api/coupons/${couponId}/status`, {
+                        method: 'PUT',
+                        headers,
+                        body: JSON.stringify({ status })
+                    });
+                    if (resp.status === 403) throw new Error('需要管理員權限才能變更狀態');
+                    if (!resp.ok) throw new Error('更新失敗');
+                    const jr = await resp.json();
+                    if (!jr.success) throw new Error(jr.message || '更新失敗');
                 }
 
                 alert(`✅ 成功更新 ${selectedCoupons.size} 個優惠券的狀態`);
                 selectedCoupons.clear();
-                document.querySelector('.modal-overlay').remove();
+                const m = document.getElementById('batchOpsModal');
+                if (m) m.remove();
                 loadCoupons(currentVendor.id, ''); // 重新載入列表
             } catch (error) {
-                alert('❌ 批量更新失敗：' + error.message);
+                alert('❌ 批量更新失敗：' + (error.message || '未知錯誤'));
             }
         }
 
@@ -3271,17 +3069,28 @@
             }
 
             try {
-                // 模擬批量更新分類
+                // 逐一呼叫後端更新分類（若需最佳化可新增批量端點）
                 for (let couponId of selectedCoupons) {
-                    console.log(`更新優惠券 ${couponId} 分類為 ${newCategory}`);
+                    const resp = await fetch(`../api/coupons/${couponId}`, {
+                        method: 'PUT',
+                        headers: {
+                            ...headers,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ category: newCategory })
+                    });
+                    if (!resp.ok) throw new Error('更新失敗');
+                    const jr = await resp.json();
+                    if (!jr.success) throw new Error(jr.message || '更新失敗');
                 }
 
                 alert(`✅ 成功更新 ${selectedCoupons.size} 個優惠券的分類為「${newCategory}」`);
                 selectedCoupons.clear();
-                document.querySelector('.modal-overlay').remove();
+                const m = document.getElementById('batchOpsModal');
+                if (m) m.remove();
                 loadCoupons(currentVendor.id, '');
             } catch (error) {
-                alert('❌ 批量更新分類失敗：' + error.message);
+                alert('❌ 批量更新分類失敗：' + (error.message || '未知錯誤'));
             }
         }
 
@@ -3291,17 +3100,19 @@
                 ['ID', '標題', '分類', '狀態', '瀏覽次數', '使用次數', '建立時間']
             ];
 
-            // 模擬導出數據
-            selectedCoupons.forEach(couponId => {
-                csvData.push([
-                    couponId,
-                    `優惠券標題 ${couponId}`,
-                    '美食餐飲',
-                    '上線中',
-                    Math.floor(Math.random() * 1000),
-                    Math.floor(Math.random() * 100),
-                    new Date().toLocaleDateString('zh-TW')
-                ]);
+            // 從目前頁面表格提取對應列（近似導出）
+            const rows = Array.from(document.querySelectorAll('#rows tr'));
+            rows.forEach(tr => {
+                const cb = tr.querySelector('input[name="couponSelect"]');
+                if (!cb || !selectedCoupons.has(cb.value)) return;
+                const cells = tr.querySelectorAll('td');
+                const id = cells[1]?.textContent?.trim() || '';
+                const title = cells[2]?.querySelector('div')?.textContent?.trim() || '';
+                const category = cells[3]?.textContent?.trim() || '';
+                const status = cells[4]?.textContent?.trim() || '';
+                const stats = cells[5]?.textContent?.replace(/\s+/g, ' ').trim() || '';
+                const created = new Date().toLocaleDateString('zh-TW');
+                csvData.push([id, title, category, status, stats, '', created]);
             });
 
             const csvContent = csvData.map(row => row.join(',')).join('\n');
@@ -3332,17 +3143,23 @@
             }
 
             try {
-                // 模擬批量刪除
                 for (let couponId of selectedCoupons) {
-                    console.log(`刪除優惠券 ${couponId}`);
+                    const resp = await fetch(`../api/coupons/${couponId}`, {
+                        method: 'DELETE',
+                        headers
+                    });
+                    if (!resp.ok) throw new Error('刪除失敗');
+                    const jr = await resp.json();
+                    if (!jr.success) throw new Error(jr.message || '刪除失敗');
                 }
 
                 alert(`✅ 成功刪除 ${selectedCoupons.size} 個優惠券`);
                 selectedCoupons.clear();
-                document.querySelector('.modal-overlay').remove();
+                const m = document.getElementById('batchOpsModal');
+                if (m) m.remove();
                 loadCoupons(currentVendor.id, '');
             } catch (error) {
-                alert('❌ 批量刪除失敗：' + error.message);
+                alert('❌ 批量刪除失敗：' + (error.message || '未知錯誤'));
             }
         }
 
@@ -3364,24 +3181,7 @@
             createCoupon(template);
         }
 
-        // 修改 createCoupon 函數支援模板
-        function createCoupon(template = null) {
-            const modal = document.getElementById('couponModal');
-            modal.style.display = 'flex';
-
-            // 清空表單
-            document.getElementById('couponForm').reset();
-            document.getElementById('couponId').value = '';
-            document.getElementById('modalTitle').textContent = '新增優惠券';
-
-            // 如果有模板，填入模板數據
-            if (template) {
-                document.getElementById('title').value = template.title;
-                document.getElementById('category').value = template.category;
-                document.getElementById('description').value = template.description;
-                document.getElementById('usage_rules').value = template.usage_rules;
-            }
-        }
+        // 移除舊版 createCoupon（已統一到上方函數）
 
         // 搜索和篩選功能
         function setupCouponFilters() {
@@ -3431,6 +3231,45 @@
 
             // 設置篩選器
             setupCouponFilters();
+
+            // ESC 關閉模態窗（優惠券與批量操作）
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const couponModal = document.getElementById('couponModal');
+                    if (couponModal && couponModal.classList.contains('active')) {
+                        closeCouponModal();
+                    }
+                    const batchModal = document.getElementById('batchOpsModal');
+                    if (batchModal) batchModal.remove();
+                }
+            });
+
+            // 訂單與客戶的搜尋/篩選
+            const ordersSearch = document.getElementById('ordersSearch');
+            const ordersFilter = document.getElementById('ordersFilter');
+            if (ordersSearch && ordersFilter) {
+                let t; ordersSearch.addEventListener('input', () => {
+                    clearTimeout(t); t = setTimeout(() => {
+                        if (currentSection === 'orders') loadOrders(ordersFilter.value, ordersSearch.value);
+                    }, 300);
+                });
+                ordersFilter.addEventListener('change', () => {
+                    if (currentSection === 'orders') loadOrders(ordersFilter.value, ordersSearch.value);
+                });
+            }
+
+            const customersSearch = document.getElementById('customersSearch');
+            const customersFilter = document.getElementById('customersFilter');
+            if (customersSearch && customersFilter) {
+                let t2; customersSearch.addEventListener('input', () => {
+                    clearTimeout(t2); t2 = setTimeout(() => {
+                        if (currentSection === 'customers') loadCustomers(customersFilter.value, customersSearch.value);
+                    }, 300);
+                });
+                customersFilter.addEventListener('change', () => {
+                    if (currentSection === 'customers') loadCustomers(customersFilter.value, customersSearch.value);
+                });
+            }
         });
 
         // === 核銷管理功能 ===
@@ -3529,6 +3368,179 @@
                     </tr>
                 `;
             }
+        }
+
+        // 訂單管理：沿用核銷記錄
+        async function loadOrders(filter = 'month', q = '') {
+            const tbody = document.getElementById('ordersRows');
+            if (!tbody) return;
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #6b7280;">
+                        <div class="loading"></div>
+                        <p style="margin-top: 12px;">載入訂單中...</p>
+                    </td>
+                </tr>
+            `;
+            try {
+                const response = await fetch(`../api/stats/verification-records?filter=${filter}`, { headers });
+                const data = await response.json();
+                let rows = data.success ? data.data : [];
+
+                if (q) {
+                    const kw = q.toLowerCase();
+                    rows = rows.filter(r =>
+                        String(r.verification_code || '').toLowerCase().includes(kw) ||
+                        String(r.coupon_title || '').toLowerCase().includes(kw) ||
+                        String(r.username || '').toLowerCase().includes(kw) ||
+                        String(r.email || '').toLowerCase().includes(kw)
+                    );
+                }
+
+                if (!rows.length) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: #6b7280;">
+                                <div style="font-size: 48px; margin-bottom: 16px;">📦</div>
+                                <p>暫無訂單</p>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tbody.innerHTML = rows.map(record => `
+                    <tr>
+                        <td style=\"font-size: 14px;\">${new Date(record.verified_at).toLocaleString('zh-TW')}</td>
+                        <td><code style=\"font-size: 13px;\">${record.verification_code}</code></td>
+                        <td>
+                            <div style=\"font-weight: 600; margin-bottom: 4px; font-size: 15px; line-height: 1.4; color: #1f2937;\">${record.coupon_title}</div>
+                            <div style=\"font-size: 13px; color: #6b7280; line-height: 1.3;\">${record.company_name}</div>
+                        </td>
+                        <td>
+                            <div style=\"font-weight: 500; margin-bottom: 2px; font-size: 14px;\">${record.username}</div>
+                            <div style=\"font-size: 13px; color: #6b7280;\">${record.email}</div>
+                        </td>
+                        <td style=\"font-weight: 600; font-size: 14px; text-align: center;\">
+                            ${record.discount_value}${record.discount_type === 'percentage' ? '%' : '元'}
+                        </td>
+                        <td>
+                            <span class=\"verification-status verified\">已核銷</span>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan=\"6\" style=\"text-align: center; padding: 40px; color: #ef4444;\">載入失敗</td>
+                    </tr>
+                `;
+            }
+        }
+
+        function exportOrdersData() {
+            const rows = Array.from(document.querySelectorAll('#ordersRows tr'));
+            const csv = [['時間', '驗證碼', '優惠券', '客戶', '折扣', '狀態']];
+            rows.forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if (tds.length < 6) return;
+                csv.push([
+                    tds[0].textContent.trim(),
+                    tds[1].textContent.trim(),
+                    tds[2].textContent.replace(/\s+/g, ' ').trim(),
+                    tds[3].textContent.replace(/\s+/g, ' ').trim(),
+                    tds[4].textContent.trim(),
+                    tds[5].textContent.trim()
+                ]);
+            });
+            const content = csv.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `訂單_${new Date().toLocaleDateString('zh-TW').replace(/\//g, '')}.csv`;
+            document.body.appendChild(a); a.click(); a.remove();
+        }
+
+        // 客戶管理：由核銷記錄彙總
+        async function loadCustomers(filter = 'month', q = '') {
+            const tbody = document.getElementById('customersRows');
+            if (!tbody) return;
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan=\"5\" style=\"text-align: center; padding: 40px; color: #6b7280;\">
+                        <div class=\"loading\"></div>
+                        <p style=\"margin-top: 12px;\">載入客戶中...</p>
+                    </td>
+                </tr>
+            `;
+            try {
+                const resp = await fetch(`../api/stats/verification-records?filter=${filter}`, { headers });
+                const data = await resp.json();
+                const records = data.success ? data.data : [];
+                const map = new Map();
+                records.forEach(r => {
+                    const key = r.email || r.username;
+                    if (!key) return;
+                    if (!map.has(key)) {
+                        map.set(key, {
+                            username: r.username || '-',
+                            email: r.email || '-',
+                            count: 0,
+                            last: 0,
+                            coupons: new Set()
+                        });
+                    }
+                    const it = map.get(key);
+                    it.count += 1;
+                    it.last = Math.max(it.last, new Date(r.verified_at).getTime());
+                    if (r.coupon_title) it.coupons.add(r.coupon_title);
+                });
+                let list = Array.from(map.values()).map(v => ({
+                    username: v.username,
+                    email: v.email,
+                    count: v.count,
+                    last: v.last,
+                    couponCount: v.coupons.size
+                }));
+                if (q) {
+                    const kw = q.toLowerCase();
+                    list = list.filter(x => x.username.toLowerCase().includes(kw) || x.email.toLowerCase().includes(kw));
+                }
+                if (!list.length) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan=\"5\" style=\"text-align: center; padding: 40px; color: #6b7280;\">暫無客戶紀錄</td>
+                        </tr>`;
+                    return;
+                }
+                tbody.innerHTML = list.map(x => `
+                    <tr>
+                        <td>${x.username}</td>
+                        <td>${x.email}</td>
+                        <td style=\"text-align:center; font-weight:600;\">${x.count}</td>
+                        <td>${x.last ? new Date(x.last).toLocaleString('zh-TW') : '-'}</td>
+                        <td style=\"text-align:center;\">${x.couponCount}</td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan=\"5\" style=\"text-align:center;color:#ef4444; padding: 40px;\">載入失敗</td></tr>`;
+            }
+        }
+
+        function exportCustomersData() {
+            const rows = Array.from(document.querySelectorAll('#customersRows tr'));
+            const csv = [['用戶', 'Email', '核銷次數', '最近核銷時間', '優惠券數']];
+            rows.forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if (tds.length < 5) return;
+                csv.push(Array.from(tds).map(td => td.textContent.replace(/\s+/g, ' ').trim()));
+            });
+            const content = csv.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `客戶_${new Date().toLocaleDateString('zh-TW').replace(/\//g, '')}.csv`;
+            document.body.appendChild(a); a.click(); a.remove();
         }
 
         // 驗證優惠券
@@ -3659,8 +3671,30 @@
         // 導出核銷數據
         function exportVerificationData() {
             const filter = document.getElementById('verificationFilter').value;
-            // 這裡可以實現 CSV 導出邏輯
-            alert(`導出 ${filter} 核銷記錄功能開發中...`);
+            const rows = Array.from(document.querySelectorAll('#verificationRecords tr'));
+            const csv = [
+                ['核銷時間', '驗證碼', '優惠券', '用戶', '折扣', '狀態']
+            ];
+            rows.forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if (tds.length < 6) return;
+                const time = tds[0].textContent.trim();
+                const code = tds[1].textContent.replace(/\s+/g, ' ').trim();
+                const coupon = tds[2].textContent.replace(/\s+/g, ' ').trim();
+                const user = tds[3].textContent.replace(/\s+/g, ' ').trim();
+                const discount = tds[4].textContent.trim();
+                const status = tds[5].textContent.trim();
+                csv.push([time, code, coupon, user, discount, status]);
+            });
+
+            const content = csv.map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `核銷記錄_${filter}_${new Date().toLocaleDateString('zh-TW').replace(/\//g, '')}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
         }
 
         // 核銷篩選器變更事件

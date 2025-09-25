@@ -177,16 +177,52 @@ class CategoryController {
 
     private function validate($input, $isCreate = false) {
         $errors = [];
+
+        // 必填欄位
         if ($isCreate) {
             if (empty($input['name'])) $errors['name'] = 'name 必填';
             if (empty($input['slug'])) $errors['slug'] = 'slug 必填';
         }
-        if (isset($input['slug']) && !preg_match('/^[a-z0-9\-]+$/', $input['slug'])) {
-            $errors['slug'] = 'slug 僅能包含小寫英數與 -';
+
+        // 名稱長度限制
+        if (isset($input['name'])) {
+            $name = trim((string)$input['name']);
+            if ($name === '') $errors['name'] = 'name 不可為空白';
+            if (mb_strlen($name, 'UTF-8') > 50) $errors['name'] = 'name 最長 50 字';
         }
-        if (isset($input['color']) && !preg_match('/^#?[0-9a-fA-F]{6}$/', $input['color'])) {
-            $errors['color'] = 'color 必須為 6 碼十六進位色碼';
+
+        // slug 規則與長度
+        if (isset($input['slug'])) {
+            $slug = (string)$input['slug'];
+            if (!preg_match('/^[a-z0-9\-]+$/', $slug)) {
+                $errors['slug'] = 'slug 僅能包含小寫英數與 -';
+            }
+            if (strlen($slug) > 50) $errors['slug'] = 'slug 最長 50 字元';
         }
+
+        // 顏色格式（可帶或不帶 #）
+        if (isset($input['color']) && $input['color'] !== null && $input['color'] !== '') {
+            if (!preg_match('/^#?[0-9a-fA-F]{6}$/', (string)$input['color'])) {
+                $errors['color'] = 'color 必須為 6 碼十六進位色碼';
+            }
+        }
+
+        // icon 與 description 長度限制
+        if (isset($input['icon']) && mb_strlen((string)$input['icon'], 'UTF-8') > 100) {
+            $errors['icon'] = 'icon 最長 100 字';
+        }
+        if (isset($input['description']) && mb_strlen((string)$input['description'], 'UTF-8') > 1000) {
+            $errors['description'] = 'description 最長 1000 字';
+        }
+
+        // sort_order 與 is_active 類型檢查
+        if (isset($input['sort_order']) && !is_numeric($input['sort_order'])) {
+            $errors['sort_order'] = 'sort_order 必須為數字';
+        }
+        if (isset($input['is_active']) && !in_array((int)$input['is_active'], [0,1], true)) {
+            $errors['is_active'] = 'is_active 僅能為 0 或 1';
+        }
+
         return $errors;
     }
 }

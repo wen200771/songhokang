@@ -79,6 +79,24 @@ $routes = [
     'POST /categories' => 'CategoryController@create',
     'PUT /categories/{id}' => 'CategoryController@update',
     'DELETE /categories/{id}' => 'CategoryController@delete',
+
+    // 標籤管理
+    'GET /tags' => 'TagController@index',
+    'POST /tags' => 'TagController@create',
+    'PUT /tags/{id}' => 'TagController@update',
+    'DELETE /tags/{id}' => 'TagController@delete',
+
+    // 地區管理
+    'GET /regions' => 'RegionController@index',
+    'POST /regions' => 'RegionController@create',
+    'PUT /regions/{id}' => 'RegionController@update',
+    'DELETE /regions/{id}' => 'RegionController@delete',
+
+    // 優惠券關聯（標籤/地區）
+    'GET /coupons/{id}/tags' => 'CouponMetaController@getTags',
+    'PUT /coupons/{id}/tags' => 'CouponMetaController@updateTags',
+    'GET /coupons/{id}/regions' => 'CouponMetaController@getRegions',
+    'PUT /coupons/{id}/regions' => 'CouponMetaController@updateRegions',
     
     // 文件上傳
     'POST /upload/image' => 'UploadController@image',
@@ -93,6 +111,14 @@ $routes = [
     // 系統設定
     'GET /settings' => 'SettingController@index',
     'PUT /settings' => 'SettingController@update',
+
+    // 進階優惠券查詢（不影響既有 /coupons）
+    'GET /coupons/advanced' => 'CouponAdvancedController@index',
+
+    // QA 檢測：接收前端 QA 頁送來的測試報告並寫檔
+    'POST /qa/report' => 'StatsController@qaReport',
+    'GET /qa/report/latest' => 'StatsController@qaReportLatest',
+    'POST /qa/reset' => 'StatsController@qaReset',
 ];
 
 /**

@@ -187,10 +187,10 @@ class Coupon {
     public function create($data) {
         $sql = "INSERT INTO coupons (
                     vendor_id, title, category, description, discount_type, discount_value,
-                    start_date, end_date, usage_rules, address, phone, image, status, created_at, updated_at
+                    start_date, end_date, terms, image, status, created_at, updated_at
                 ) VALUES (
                     :vendor_id, :title, :category, :description, :discount_type, :discount_value,
-                    :start_date, :end_date, :usage_rules, :address, :phone, :image, :status, NOW(), NOW()
+                    :start_date, :end_date, :terms, :image, :status, NOW(), NOW()
                 )";
         
         $stmt = $this->conn->prepare($sql);
@@ -202,9 +202,7 @@ class Coupon {
         $stmt->bindValue(':discount_value', $data['discount_value'], PDO::PARAM_STR);
         $stmt->bindValue(':start_date', $data['start_date'], PDO::PARAM_STR);
         $stmt->bindValue(':end_date', $data['end_date'], PDO::PARAM_STR);
-        $stmt->bindValue(':usage_rules', $data['usage_rules'], PDO::PARAM_STR);
-        $stmt->bindValue(':address', $data['address'], PDO::PARAM_STR);
-        $stmt->bindValue(':phone', $data['phone'], PDO::PARAM_STR);
+        $stmt->bindValue(':terms', $data['usage_rules'], PDO::PARAM_STR);
         $stmt->bindValue(':image', $data['image'], PDO::PARAM_STR);
         $stmt->bindValue(':status', $data['status'], PDO::PARAM_STR);
         
@@ -226,9 +224,7 @@ class Coupon {
                     discount_value = :discount_value,
                     start_date = :start_date,
                     end_date = :end_date,
-                    usage_rules = :usage_rules,
-                    address = :address,
-                    phone = :phone,
+                    terms = :terms,
                     image = :image,
                     updated_at = NOW()
                 WHERE id = :id";
@@ -242,9 +238,7 @@ class Coupon {
         $stmt->bindValue(':discount_value', $data['discount_value'], PDO::PARAM_STR);
         $stmt->bindValue(':start_date', $data['start_date'], PDO::PARAM_STR);
         $stmt->bindValue(':end_date', $data['end_date'], PDO::PARAM_STR);
-        $stmt->bindValue(':usage_rules', $data['usage_rules'], PDO::PARAM_STR);
-        $stmt->bindValue(':address', $data['address'], PDO::PARAM_STR);
-        $stmt->bindValue(':phone', $data['phone'], PDO::PARAM_STR);
+        $stmt->bindValue(':terms', $data['usage_rules'], PDO::PARAM_STR);
         $stmt->bindValue(':image', $data['image'], PDO::PARAM_STR);
         
         return $stmt->execute();
